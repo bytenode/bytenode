@@ -63,8 +63,10 @@ The `.jsc` file must have been compiled using `bytenode.compileFile()`, or have 
 
 ## bytenode cli
 
+Assuming that you have installed `bytenode` globally, otherwise you will have to call `./cli.js` file.
+
 ```
-Usage: cli.js [options] filename [filename2 filename3 ...]
+Usage: bytenode [options] filename [filename2 filename3 ...]
 
   Options:
 
@@ -79,23 +81,23 @@ Some quick examples:
 
 * Compile `express-server.js` to `express-server.jsc`.
 ```console
-user@machine:~$ ./cli.js --compile express-server.js
+user@machine:~$ bytenode --compile express-server.js
 ```
 
 * run your compiled file `express-server.jsc`.
 ```console
-user@machine:~$ ./cli.js --run express-server.jsc
+user@machine:~$ bytenode --run express-server.jsc
 Server listening on port 3000
 ```
 
 * Compile all `.js` files in `./app` directory.
 ```console
-user@machine:~$ ./cli.js --compile ./app/*.js
+user@machine:~$ bytenode --compile ./app/*.js
 ```
 
 * Compile all `.js` files in your project.
 ```console
-user@machine:~$ ./cli.js --compile ./**/*.js
+user@machine:~$ bytenode --compile ./**/*.js
 ```
 Note: you may need to enable `globstar` option in bash (you should add it to `~/.bashrc`):
 `shopt -s globstar`
