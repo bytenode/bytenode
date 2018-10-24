@@ -3,7 +3,7 @@ A minimalist bytecode compiler for Node.js.
 
 This tool truly compiles your Javascript code into `V8` bytecode. It can be used with Node.js >= 6.x.x (or maybe even Node.js v5), as well as Electron and NW.js (examples will be added soon).
 
-It allows you to hide or protect your source code in a better way than obfuscation and other tricks. I have to say that I'm aware of the counter arguments against this "protect" attitude (for example: ), but it still 
+It allows you to hide or protect your source code in a better way than obfuscation and other tricks. I have to say that I'm aware of the counter arguments against this "protect" attitude (for example: [01](https://github.com/electron/electron/issues/3041), [02](https://stackoverflow.com/questions/48890215/hide-source-code-of-electron-alteast-1-file-possible), but it still a valid use case and the lack of this feature continues to keep many people from using Node.js.
 
 It's more like how python generates `.pyc` of `.py` files, but in Node.js world ( `.js > .jsc` ).
 
