@@ -1,0 +1,24 @@
+{
+  "name": "bytenode",
+  "version": "0.1.0",
+  "description": "A minimalist bytecode compiler for Node.js",
+  "main": "index.js",
+  "bin": "cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OsamaAbbas/bytenode.git"
+  },
+  "keywords": [],
+  "author": "Osama Abbas <pw.osama@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/OsamaAbbas/bytenode/issues"
+  },
+  "homepage": "https://github.com/OsamaAbbas/bytenode#readme",
+  "dependencies": {
+    "commander": "^2.19.0"
+  }
+}
