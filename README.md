@@ -1,9 +1,9 @@
 # bytenode
 A minimalist bytecode compiler for Node.js.
 
-This tool truly compiles your Javascript code into `V8` bytecode. It can be used with Node.js >= 6.x.x (or maybe even Node.js v5), as well as Electron and NW.js (examples will be added soon).
+This tool truly compiles your JavaScript code into `V8` bytecode. It can be used with Node.js >= 6.x.x (or maybe even Node.js v5), as well as Electron and NW.js (examples will be added soon).
 
-It allows you to hide or protect your source code in a better way than obfuscation and other tricks. I have to say that I'm aware of the counter arguments against this "protect" attitude (for example: [01](https://github.com/electron/electron/issues/3041), [02](https://stackoverflow.com/questions/48890215/hide-source-code-of-electron-alteast-1-file-possible)), but it still a valid use case and the lack of this feature continues to keep many people from using Node.js.
+It allows you to hide or protect your source code in a better way than obfuscation and other tricks. I have to say that I'm aware of the counter arguments against this "protect" attitude (for example: [01](https://github.com/electron/electron/issues/3041), [02](https://stackoverflow.com/questions/48890215/hide-source-code-of-electron-alteast-1-file-possible)), but it is still a valid use case and the lack of this feature continues to keep many people from using Node.js.
 
 It's more like how python generates `.pyc` of `.py` files, but in Node.js world ( `.js > .jsc` ).
 
@@ -13,7 +13,13 @@ It's more like how python generates `.pyc` of `.py` files, but in Node.js world 
 npm install --save bytenode
 ```
 
-## How to use (programmatically)?
+Or globally:
+
+```console
+sudo npm install -g bytenode
+```
+
+## How to use it programmatically?
 
 You have to run node with this flag `node --no-lazy` in order to compile all functions in your code eagerly. Or, if you have no control on how your code will be run, you can use `v8.setFlagsFromString('--no-lazy')` function as well.
 
@@ -21,7 +27,7 @@ You have to run node with this flag `node --no-lazy` in order to compile all fun
 const bytenode = require('bytenode');
 ```
 
-### How to compile Javascript code?
+### How to compile JavaScript code?
 
 ```javascript
 let helloWorldBytecode = bytenode.compileCode(`console.log('Hello World!');`);
@@ -47,7 +53,7 @@ This function compiles your `.js` file, saves `.jsc` to disk, and returns the pa
 
 The second argument is optional, the default behavior is to save the compiled file using the same path and name of the original file, but with `.jsc` extension.
 
-### How to un bytecode compiled file?
+### How to run bytecode compiled file?
 
 ```javascript
 bytenode.runBytecodeFile('/path/to/compiled/file.jsc');
@@ -105,8 +111,11 @@ Note: you may need to enable `globstar` option in bash (you should add it to `~/
 ## Todo:
 - [ ] Write some tests.
 - [ ] Add some examples.
-- [ ] Add an NW.js example (NW.js has a similar tool `nwjc`).
-- [ ] Add an Electron example.
+- [x] Add an Electron example.
+- [ ] Add an NW.js example (NW.js has a similar tool `nwjc`, which can be used with Client-side JavaScript code [See here](http://docs.nwjs.io/en/latest/For%20Users/Advanced/Protect%20JavaScript%20Source%20Code/). Using both tools, you can compile all you code).
+- [ ] Add an advanced Electron and NW.js example.
+- [ ] Benchmark `.jsc` vs `.js`.
+- [ ] [Maybe] Provide a Node.js build that supports `.jsc` files natively (Hint: just build node using `./configure --link-module` option).
 
 ## Acknowledgements
 
