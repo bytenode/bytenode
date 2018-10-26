@@ -11,12 +11,16 @@
     "type": "git",
     "url": "git+https://github.com/OsamaAbbas/bytenode.git"
   },
-  "keywords": [],
+  "keywords": [
+    "bytecode",
+    "compile",
+    "v8-snapshots",
+    "compiler"
+  ],
   "author": "Osama Abbas <pw.osama@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/OsamaAbbas/bytenode/issues"
   },
-  "homepage": "https://github.com/OsamaAbbas/bytenode#readme",
-  "dependencies": {}
+  "homepage": "https://github.com/OsamaAbbas/bytenode#readme"
 }
