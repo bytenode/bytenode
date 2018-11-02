@@ -2,8 +2,11 @@
 
 const fs = require('fs');
 const vm = require('vm');
+const v8 = require('v8');
 const path = require('path');
 const Module = require('module');
+
+v8.setFlagsFromString('--no-lazy');
 
 const COMPILED_EXTNAME = '.jsc';
 
