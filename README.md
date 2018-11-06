@@ -76,8 +76,8 @@ Usage: bytenode [options] filename [filename2 filename3 ...]
 
   Options:
 
-    -r, --run            run <file> [<file2> <file3> ...]
-    -c, --compile        compile <file> [<file2> <file3> ...]
+    -r, --run            <filename> [arg1 arg2 ...]
+    -c, --compile        <filename> [<filename2> <filename3> ...]
 
     -h, --help           output usage information
     -v, --version        output the version number
@@ -110,11 +110,11 @@ Note: you may need to enable `globstar` option in bash (you should add it to `~/
 
 ## Todo:
 - [ ] Write some tests.
-- [ ] Add some examples.
+- [x] Add some examples.
 - [x] Add an Electron example.
-- [ ] Add an NW.js example (NW.js has a similar tool `nwjc`, which can be used with Client-side JavaScript code [See here](http://docs.nwjs.io/en/latest/For%20Users/Advanced/Protect%20JavaScript%20Source%20Code/). Using both tools, you can compile all you code).
-- [ ] Add an advanced Electron and NW.js example.
-- [ ] Benchmark `.jsc` vs `.js`.
+- [x] Add an NW.js example (NW.js has a similar tool `nwjc`, which can be used with Client-side JavaScript code [See here](http://docs.nwjs.io/en/latest/For%20Users/Advanced/Protect%20JavaScript%20Source%20Code/). Using both tools, you can compile all you code).
+- [ ] Add advanced Electron and NW.js examples.
+- [x] Benchmark `.jsc` vs `.js`.
 - [ ] [Maybe] Provide a Node.js build that supports `.jsc` files natively (Hint: just build node using `./configure --link-module` option).
 
 ## Acknowledgements
