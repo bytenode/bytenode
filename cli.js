@@ -4,6 +4,7 @@ const v8 = require('v8');
 const fs = require('fs');
 const path = require('path');
 const bytenode = require('./index.js');
+const spawnSync = require('child_process').spawnSync;
 
 v8.setFlagsFromString('--no-lazy');
 
@@ -25,12 +26,12 @@ if (program.flags.includes('-v') || program.flags.includes('--version')) {
 if (program.flags.includes('-h') || program.flags.includes('--help')) {
 
   console.log(`
-Usage: ${path.basename(__filename)} [options] filename [filename2 filename3 ...]
+  Usage: bytenode [options] filename [filename2 filename3 ...]
 
   Options:
 
-    -r, --run            run <file> [<file2> <file3> ...]
-    -c, --compile        compile <file> [<file2> <file3> ...]
+    -r, --run            <filename> [arg1 arg2 ...]
+    -c, --compile        <filename> [<filename2> <filename3> ...]
 
     -h, --help           output usage information
     -v, --version        output the version number
@@ -41,14 +42,17 @@ Usage: ${path.basename(__filename)} [options] filename [filename2 filename3 ...]
 
 if (program.flags.includes('-r') || program.flags.includes('--run')) {
 
-  program.files.forEach(function (file) {
-
-    try {
-      require(path.resolve(file));
-    } catch (error) {
-      console.error(error);
-    }
-  });
+  try {
+    spawnSync(program.nodeBin, [
+      '-r',
+      path.resolve(__dirname, 'index.js'),
+      path.resolve(program.files.shift())
+    ].concat(program.files), {
+        stdio: 'inherit'
+      });
+  } catch (error) {
+    console.error(error);
+  }
 
   process.exit(0);
 }
@@ -56,6 +60,8 @@ if (program.flags.includes('-r') || program.flags.includes('--run')) {
 if (program.flags.includes('-c') || program.flags.includes('--compile')) {
 
   program.files.forEach(function (file) {
+
+    file = path.resolve(file);
 
     if (fs.existsSync(file) && fs.statSync(file).isFile() && path.extname(file) == '.js') {
 
