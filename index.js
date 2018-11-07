@@ -26,8 +26,7 @@ const compileCode = function (javascriptCode) {
 
 const runBytecode = function (bytecodeBuffer) {
 
-  let length = bytecodeBuffer.slice(8, 12)
-    .reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
+  let length = bytecodeBuffer.readIntLE(8, 4);
   let dummyCode = ' '.repeat(length);
 
   let script = new vm.Script(dummyCode, {
@@ -61,8 +60,7 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   let bytecodeBuffer = fs.readFileSync(filename);
 
-  let length = bytecodeBuffer.slice(8, 12)
-    .reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
+  let length = bytecodeBuffer.readIntLE(8, 4);
 
   let dummyCode = ' '.repeat(length);
 
