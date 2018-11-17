@@ -16,30 +16,6 @@ const program = {
   files: process.argv.slice(2).filter(arg => arg[0] !== '-' && arg[1] !== '-'),
 };
 
-if (program.flags.includes('-v') || program.flags.includes('--version')) {
-
-  const package = require('./package.json');
-  console.log(package.name, package.version);
-  process.exit(0);
-}
-
-if (program.flags.includes('-h') || program.flags.includes('--help')) {
-
-  console.log(`
-  Usage: bytenode [options] filename [filename2 filename3 ...]
-
-  Options:
-
-    -r, --run            <filename> [arg1 arg2 ...]
-    -c, --compile        <filename> [<filename2> <filename3> ...]
-
-    -h, --help           output usage information
-    -v, --version        output the version number
-`);
-
-  process.exit(0);
-}
-
 if (program.flags.includes('-r') || program.flags.includes('--run')) {
 
   try {
@@ -53,11 +29,9 @@ if (program.flags.includes('-r') || program.flags.includes('--run')) {
   } catch (error) {
     console.error(error);
   }
-
-  process.exit(0);
 }
 
-if (program.flags.includes('-c') || program.flags.includes('--compile')) {
+else if (program.flags.includes('-c') || program.flags.includes('--compile')) {
 
   program.files.forEach(function (file) {
 
@@ -74,8 +48,25 @@ if (program.flags.includes('-c') || program.flags.includes('--compile')) {
       console.error(`Error: Cannot find file '${file}'`);
     }
   });
-
-  process.exit(0);
 }
 
-console.log(program);
+else if (program.flags.includes('-h') || program.flags.includes('--help')) {
+
+  console.log(`
+  Usage: bytenode [options] filename [filename2 filename3 ...]
+
+  Options:
+
+    -r, --run            <filename> [arg1 arg2 ...]
+    -c, --compile        <filename> [<filename2> <filename3> ...]
+
+    -h, --help           output usage information
+    -v, --version        output the version number
+`);
+}
+
+else if (program.flags.includes('-v') || program.flags.includes('--version')) {
+
+  const package = require('./package.json');
+  console.log(package.name, package.version);
+}
