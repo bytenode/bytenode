@@ -24,9 +24,29 @@ const compileCode = function (javascriptCode) {
   return bytecodeBuffer;
 };
 
+const getCPUFeatures = function () {
+
+  return compileCode('ಠ_ಠ').slice(12, 16);
+};
+
+const getFlagsHash = function () {
+
+  return compileCode('ಠ_ಠ').slice(16, 20);
+};
+
+const fixBytecode = function (bytecodeBuffer) {
+
+  getCPUFeatures().copy(bytecodeBuffer, 12);
+  getFlagsHash().copy(bytecodeBuffer, 16);
+
+  return bytecodeBuffer;
+};
+
 const runBytecode = function (bytecodeBuffer) {
 
-  let length = bytecodeBuffer.slice(8, 12).reduce( (sum, number, power) => sum += number * 256**power , 0);
+  bytecodeBuffer = fixBytecode(bytecodeBuffer);
+
+  let length = bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * 256 ** power, 0);
 
   let dummyCode = ' '.repeat(length);
 
@@ -61,7 +81,9 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   let bytecodeBuffer = fs.readFileSync(filename);
 
-  let length = bytecodeBuffer.slice(8, 12).reduce( (sum, number, power) => sum += number * 256**power , 0);
+  bytecodeBuffer = fixBytecode(bytecodeBuffer);
+
+  let length = bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * 256 ** power, 0);
 
   let dummyCode = ' '.repeat(length);
 
@@ -81,7 +103,7 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
   This part is based on:
   https://github.com/zertosh/v8-compile-cache/blob/7182bd0e30ab6f6421365cee0a0c4a8679e9eb7c/v8-compile-cache.js#L158-L178
   */
-  
+
   function require(id) {
     return module.require(id);
   }
