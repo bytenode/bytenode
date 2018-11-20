@@ -1,6 +1,6 @@
 {
   "name": "bytenode",
-  "version": "0.2.5",
+  "version": "1.0.0",
   "description": "A minimalist bytecode compiler for Node.js",
   "main": "index.js",
   "bin": "cli.js",
@@ -12,9 +12,10 @@
     "url": "git+https://github.com/OsamaAbbas/bytenode.git"
   },
   "keywords": [
+    "bytenode",
     "bytecode",
-    "compile",
     "v8-snapshots",
+    "compile",
     "compiler"
   ],
   "author": "Osama Abbas <pw.osama@gmail.com>",
