@@ -53,29 +53,27 @@ if (program.flags.includes('--compile')) {
     }
   });
 
-  let script = '';
+  if (program.files.length === 0) {
 
-  process.stdin.setEncoding('utf-8');
+    let script = '';
 
-  process.stdin.on('readable', () => {
-    let data = process.stdin.read();
-    if (data !== null) {
-      script += data;
-    }
-  });
+    process.stdin.setEncoding('utf-8');
 
-  process.stdin.on('end', () => {
-    
-    try {
-      process.stdout.write(bytenode.compileCode(wrap(script)));
-    } catch (error) {
-      console.error(error);
-    }
-  });
+    process.stdin.on('readable', () => {
+      let data = process.stdin.read();
+      if (data !== null) {
+        script += data;
+      }
+    });
 
-  if (!!script && program.files.length === 0) {
+    process.stdin.on('end', () => {
 
-    console.log(`Nothing to compile, abort.`);
+      try {
+        process.stdout.write(bytenode.compileCode(wrap(script)));
+      } catch (error) {
+        console.error(error);
+      }
+    });
   }
 }
 
