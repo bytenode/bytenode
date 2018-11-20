@@ -3,41 +3,45 @@
 const v8 = require('v8');
 const fs = require('fs');
 const path = require('path');
-const bytenode = require('./index.js');
+const wrap = require('module').wrap;
 const spawnSync = require('child_process').spawnSync;
 
+const bytenode = require('./index.js');
+
 v8.setFlagsFromString('--no-lazy');
+
+let args = process.argv.slice(2);
+
+if (args.includes('-c')) {
+  args[args.indexOf('-c')] = '--compile';
+}
+if (args.includes('-o')) {
+  args[args.indexOf('-o')] = '--out';
+}
+
+if (args.includes('-h')) {
+  args[args.indexOf('-h')] = '--help';
+}
+
+if (args.includes('-v')) {
+  args[args.indexOf('-v')] = '--version';
+}
 
 const program = {
   dirname: __dirname,
   filename: __filename,
   nodeBin: process.argv[0],
-  flags: process.argv.filter(arg => arg[0] === '-'),
-  files: process.argv.slice(2).filter(arg => arg[0] !== '-' && arg[1] !== '-'),
+  flags: args.filter(arg => arg[0] === '-'),
+  files: args.filter(arg => arg[0] !== '-' && arg[1] !== '-'),
 };
 
-if (program.flags.includes('-r') || program.flags.includes('--run')) {
-
-  try {
-    spawnSync(program.nodeBin, [
-      '-r',
-      path.resolve(__dirname, 'index.js'),
-      path.resolve(program.files.shift())
-    ].concat(program.files), {
-        stdio: 'inherit'
-      });
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-else if (program.flags.includes('-c') || program.flags.includes('--compile')) {
+if (program.flags.includes('--compile')) {
 
   program.files.forEach(function (file) {
 
     file = path.resolve(file);
 
-    if (fs.existsSync(file) && fs.statSync(file).isFile() && path.extname(file) == '.js') {
+    if (fs.existsSync(file) && fs.statSync(file).isFile()) {
 
       try {
         bytenode.compileFile(file);
@@ -45,28 +49,77 @@ else if (program.flags.includes('-c') || program.flags.includes('--compile')) {
         console.error(error);
       }
     } else {
-      console.error(`Error: Cannot find file '${file}'`);
+      console.error(`Error: Cannot find file '${file}'.`);
     }
   });
+
+  let script = '';
+
+  process.stdin.setEncoding('utf-8');
+
+  process.stdin.on('readable', () => {
+    let data = process.stdin.read();
+    if (data !== null) {
+      script += data;
+    }
+  });
+
+  process.stdin.on('end', () => {
+    
+    try {
+      process.stdout.write(bytenode.compileCode(wrap(script)));
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  if (!!script && program.files.length === 0) {
+
+    console.log(`Nothing to compile, abort.`);
+  }
 }
 
-else if (program.flags.includes('-h') || program.flags.includes('--help')) {
+else if (program.flags.includes('--help')) {
 
   console.log(`
-  Usage: bytenode [options] filename [filename2 filename3 ...]
+  Usage: bytenode [option] [ FILE... | - ] [arguments]
 
   Options:
+    -h, --help                        show help information.
+    -v, --version                     show bytenode version.
 
-    -r, --run            <filename> [arg1 arg2 ...]
-    -c, --compile        <filename> [<filename2> <filename3> ...]
+    -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
 
-    -h, --help           output usage information
-    -v, --version        output the version number
+  Examples:
+
+  $ bytenode -c script.js             compile \`script.js\` to \`script.jsc\`.
+  $ bytenode -c server.js app.js
+  $ bytenode -c src/*.js              compile all \`.js\` files in \`src/\` directory.
+
+  $ bytenode script.jsc [arguments]   run \`script.jsc\` with arguments.
+  $ bytenode                          open Node REPL with bytenode pre-loaded.
+
+  $ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
+                                      compile from stdin and save to \`hello.jsc\`
 `);
 }
 
-else if (program.flags.includes('-v') || program.flags.includes('--version')) {
+else if (program.flags.includes('--version') && program.flags.length === 1 && program.files.length === 0) {
 
   const package = require('./package.json');
   console.log(package.name, package.version);
+}
+
+else {
+
+  try {
+    spawnSync(program.nodeBin, [
+      '-r',
+      path.resolve(__dirname, 'index.js')
+    ].concat(args), {
+        stdio: 'inherit'
+      });
+  } catch (error) {
+    console.error(error);
+  }
 }
