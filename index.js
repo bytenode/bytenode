@@ -24,20 +24,12 @@ const compileCode = function (javascriptCode) {
   return bytecodeBuffer;
 };
 
-const getCPUFeatures = function () {
-
-  return compileCode('ಠ_ಠ').slice(12, 16);
-};
-
-const getFlagsHash = function () {
-
-  return compileCode('ಠ_ಠ').slice(16, 20);
-};
-
 const fixBytecode = function (bytecodeBuffer) {
 
-  getCPUFeatures().copy(bytecodeBuffer, 12);
-  getFlagsHash().copy(bytecodeBuffer, 16);
+  let dummyBytecode = compileCode('"ಠ_ಠ"');
+  
+  dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
+  dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
 
   return bytecodeBuffer;
 };
@@ -91,8 +83,7 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
     filename: filename,
     lineOffset: 0,
     displayErrors: true,
-    cachedData: bytecodeBuffer,
-    produceCachedData: true
+    cachedData: bytecodeBuffer
   });
 
   if (script.cachedDataRejected) {
@@ -129,7 +120,9 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
   return compiledWrapper.apply(module.exports, args);
 };
 
-exports.compileCode = compileCode;
-exports.compileFile = compileFile;
-exports.runBytecode = runBytecode;
-exports.runBytecodeFile = runBytecodeFile;
+global.bytenode = {
+  compileCode, compileFile,
+  runBytecode, runBytecodeFile
+};
+
+module.exports = global.bytenode;
