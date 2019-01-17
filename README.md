@@ -82,11 +82,11 @@ Just like regular `.js` modules. You can also omit the extension `.jsc`.
 
   Examples:
 
-  $ bytenode -c script.js             compile \`script.js\` to \`script.jsc\`.
+  $ bytenode -c script.js             compile `script.js` to `script.jsc`.
   $ bytenode -c server.js app.js
-  $ bytenode -c src/*.js              compile all \`.js\` files in \`src/\` directory.
+  $ bytenode -c src/*.js              compile all `.js` files in `src/` directory.
 
-  $ bytenode script.jsc [arguments]   run \`script.jsc\` with arguments.
+  $ bytenode script.jsc [arguments]   run `script.jsc` with arguments.
   $ bytenode                          open Node REPL with bytenode pre-loaded.
 ```
 
