@@ -27,18 +27,34 @@ const compileCode = function (javascriptCode) {
 const fixBytecode = function (bytecodeBuffer) {
 
   let dummyBytecode = compileCode('"ಠ_ಠ"');
-  
-  dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
-  dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
+
+  if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
+    // Node is v8.8.x or v8.9.x
+    dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
+    dummyBytecode.slice(20, 24).copy(bytecodeBuffer, 20);
+  } else {
+    dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
+    dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
+  }
 
   return bytecodeBuffer;
+};
+
+const readSourceHash = function (bytecodeBuffer) {
+
+  if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
+    // Node is v8.8.x or v8.9.x
+    return bytecodeBuffer.slice(12, 16).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
+  } else {
+    return bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
+  }
 };
 
 const runBytecode = function (bytecodeBuffer) {
 
   bytecodeBuffer = fixBytecode(bytecodeBuffer);
 
-  let length = bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * 256 ** power, 0);
+  let length = readSourceHash(bytecodeBuffer);
 
   let dummyCode = ' '.repeat(length);
 
@@ -75,7 +91,7 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   bytecodeBuffer = fixBytecode(bytecodeBuffer);
 
-  let length = bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * 256 ** power, 0);
+  let length = readSourceHash(bytecodeBuffer);
 
   let dummyCode = ' '.repeat(length);
 
