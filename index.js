@@ -9,6 +9,7 @@ const Module = require('module');
 v8.setFlagsFromString('--no-lazy');
 
 const COMPILED_EXTNAME = '.jsc';
+const DUMMY_CODE = 'throw new Error("V8 rejected the precompiled code.");';
 
 const compileCode = function (javascriptCode) {
 
@@ -40,13 +41,13 @@ const fixBytecode = function (bytecodeBuffer) {
   return bytecodeBuffer;
 };
 
-const readSourceHash = function (bytecodeBuffer) {
+const writeSourceHash = function (bytecodeBuffer, value) {
 
   if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
     // Node is v8.8.x or v8.9.x
-    return bytecodeBuffer.slice(12, 16).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
+    bytecodeBuffer.writeUInt32LE(value, 12);
   } else {
-    return bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
+    bytecodeBuffer.writeUInt32LE(value, 8);
   }
 };
 
@@ -54,11 +55,9 @@ const runBytecode = function (bytecodeBuffer) {
 
   bytecodeBuffer = fixBytecode(bytecodeBuffer);
 
-  let length = readSourceHash(bytecodeBuffer);
+  writeSourceHash(bytecodeBuffer, DUMMY_CODE.length);
 
-  let dummyCode = ' '.repeat(length);
-
-  let script = new vm.Script(dummyCode, {
+  let script = new vm.Script(DUMMY_CODE, {
     cachedData: bytecodeBuffer
   });
 
@@ -91,11 +90,9 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   bytecodeBuffer = fixBytecode(bytecodeBuffer);
 
-  let length = readSourceHash(bytecodeBuffer);
+  writeSourceHash(bytecodeBuffer, DUMMY_CODE.length);
 
-  let dummyCode = ' '.repeat(length);
-
-  let script = new vm.Script(dummyCode, {
+  let script = new vm.Script(DUMMY_CODE, {
     filename: filename,
     lineOffset: 0,
     displayErrors: true,
