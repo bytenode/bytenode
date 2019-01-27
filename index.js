@@ -36,8 +36,6 @@ const fixBytecode = function (bytecodeBuffer) {
     dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
     dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
   }
-
-  return bytecodeBuffer;
 };
 
 const readSourceHash = function (bytecodeBuffer) {
@@ -52,15 +50,19 @@ const readSourceHash = function (bytecodeBuffer) {
 
 const runBytecode = function (bytecodeBuffer) {
 
-  bytecodeBuffer = fixBytecode(bytecodeBuffer);
+  fixBytecode(bytecodeBuffer);
 
   let length = readSourceHash(bytecodeBuffer);
 
-  let dummyCode = ' '.repeat(length);
+  let dummyCode = '"' + "\u200b".repeat(length - 2) + '"'; // "\u200b" Zero width space
 
   let script = new vm.Script(dummyCode, {
     cachedData: bytecodeBuffer
   });
+
+  if (script.cachedDataRejected) {
+    throw new Error('Invalid or incompatible cached data (cachedDataRejected)');
+  }
 
   return script.runInThisContext();
 };
@@ -89,11 +91,11 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   let bytecodeBuffer = fs.readFileSync(filename);
 
-  bytecodeBuffer = fixBytecode(bytecodeBuffer);
+  fixBytecode(bytecodeBuffer);
 
   let length = readSourceHash(bytecodeBuffer);
 
-  let dummyCode = ' '.repeat(length);
+  let dummyCode = '"' + "\u200b".repeat(length - 2) + '"'; // "\u200b" Zero width space
 
   let script = new vm.Script(dummyCode, {
     filename: filename,
