@@ -61,7 +61,7 @@ const runBytecode = function (bytecodeBuffer) {
     cachedData: bytecodeBuffer
   });
 
-  script.runInThisContext();
+  return script.runInThisContext();
 };
 
 const compileFile = function (filename, output) {
