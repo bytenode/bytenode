@@ -41,6 +41,16 @@ const fixBytecode = function (bytecodeBuffer) {
   return bytecodeBuffer;
 };
 
+const readSourceHash = function (bytecodeBuffer) {
+
+  if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
+    // Node is v8.8.x or v8.9.x
+    return bytecodeBuffer.readUInt32LE(12);
+  } else {
+    return bytecodeBuffer.readUInt32LE(8);
+  }
+};
+
 const writeSourceHash = function (bytecodeBuffer, value) {
 
   if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
@@ -51,13 +61,26 @@ const writeSourceHash = function (bytecodeBuffer, value) {
   }
 };
 
+const getDummyCode = function (bytecodeBuffer) {
+
+  let length = readSourceHash(bytecodeBuffer);
+  let dummyCode = DUMMY_CODE;
+  if (dummyCode.length > length) {
+    writeSourceHash(bytecodeBuffer, dummyCode.length);
+  } else {
+    dummyCode += ' '.repeat(length - dummyCode.length);
+  }
+
+  return dummyCode;
+}
+
 const runBytecode = function (bytecodeBuffer) {
 
   bytecodeBuffer = fixBytecode(bytecodeBuffer);
 
-  writeSourceHash(bytecodeBuffer, DUMMY_CODE.length);
+  let dummyCode = getDummyCode(bytecodeBuffer);
 
-  let script = new vm.Script(DUMMY_CODE, {
+  let script = new vm.Script(dummyCode, {
     cachedData: bytecodeBuffer
   });
 
@@ -90,9 +113,9 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   bytecodeBuffer = fixBytecode(bytecodeBuffer);
 
-  writeSourceHash(bytecodeBuffer, DUMMY_CODE.length);
+  let dummyCode = getDummyCode(bytecodeBuffer);
 
-  let script = new vm.Script(DUMMY_CODE, {
+  let script = new vm.Script(dummyCode, {
     filename: filename,
     lineOffset: 0,
     displayErrors: true,
