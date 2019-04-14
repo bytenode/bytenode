@@ -124,7 +124,7 @@ $ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
 - [ ] Write some tests.
 - [x] Add some examples.
 - [x] Add an Electron example.
-- [x] Add an NW.js example (NW.js has a similar tool `nwjc`, which can be used with Client-side JavaScript code [See here](http://docs.nwjs.io/en/latest/For%20Users/Advanced/Protect%20JavaScript%20Source%20Code/). Using both tools, you can compile all you code).
+- [x] Add an NW.js example (NW.js has a similar tool `nwjc`, which can be used with Client-side JavaScript code [See here](http://docs.nwjs.io/en/latest/For%20Users/Advanced/Protect%20JavaScript%20Source%20Code/). Using both tools, you can compile all your code).
 - [ ] Add advanced Electron and NW.js examples.
 - [x] Benchmark `.jsc` vs `.js`.
 
