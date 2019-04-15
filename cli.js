@@ -37,19 +37,21 @@ const program = {
 
 if (program.flags.includes('--compile')) {
 
-  program.files.forEach(function (file) {
+  program.files.forEach(function (filename) {
 
-    file = path.resolve(file);
+    filename = path.resolve(filename);
 
-    if (fs.existsSync(file) && fs.statSync(file).isFile()) {
+    if (fs.existsSync(filename) && fs.statSync(filename).isFile()) {
+
+      let compileAsModule = !program.flags.includes('--no-module');
 
       try {
-        bytenode.compileFile(file);
+        bytenode.compileFile({ filename, compileAsModule });
       } catch (error) {
         console.error(error);
       }
     } else {
-      console.error(`Error: Cannot find file '${file}'.`);
+      console.error(`Error: Cannot find file '${filename}'.`);
     }
   });
 
@@ -87,6 +89,7 @@ else if (program.flags.includes('--help')) {
     -v, --version                     show bytenode version.
 
     -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
+        --no-module                   compile without producing commonjs module
 
   Examples:
 
