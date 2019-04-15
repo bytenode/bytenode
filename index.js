@@ -12,6 +12,10 @@ const COMPILED_EXTNAME = '.jsc';
 
 const compileCode = function (javascriptCode) {
 
+  if (typeof javascriptCode !== 'string') {
+    throw new Error(`javascriptCode must be string. ${typeof javascriptCode} was given.`);
+  }
+
   let script = new vm.Script(javascriptCode, {
     produceCachedData: true
   });
@@ -25,6 +29,10 @@ const compileCode = function (javascriptCode) {
 };
 
 const fixBytecode = function (bytecodeBuffer) {
+
+  if (!Buffer.isBuffer(bytecodeBuffer)) {
+    throw new Error(`bytecodeBuffer must be a buffer object.`);
+  }
 
   let dummyBytecode = compileCode('"ಠ_ಠ"');
 
@@ -40,6 +48,10 @@ const fixBytecode = function (bytecodeBuffer) {
 
 const readSourceHash = function (bytecodeBuffer) {
 
+  if (!Buffer.isBuffer(bytecodeBuffer)) {
+    throw new Error(`bytecodeBuffer must be a buffer object.`);
+  }
+
   if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
     // Node is v8.8.x or v8.9.x
     return bytecodeBuffer.slice(12, 16).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
@@ -50,11 +62,19 @@ const readSourceHash = function (bytecodeBuffer) {
 
 const runBytecode = function (bytecodeBuffer) {
 
+  if (!Buffer.isBuffer(bytecodeBuffer)) {
+    throw new Error(`bytecodeBuffer must be a buffer object.`);
+  }
+
   fixBytecode(bytecodeBuffer);
 
   let length = readSourceHash(bytecodeBuffer);
 
-  let dummyCode = '"' + "\u200b".repeat(length - 2) + '"'; // "\u200b" Zero width space
+  let dummyCode = "";
+
+  if (length > 1) {
+    dummyCode = '"' + "\u200b".repeat(length - 2) + '"'; // "\u200b" Zero width space
+  }
 
   let script = new vm.Script(dummyCode, {
     cachedData: bytecodeBuffer
@@ -67,13 +87,37 @@ const runBytecode = function (bytecodeBuffer) {
   return script.runInThisContext();
 };
 
-const compileFile = function (filename, output) {
+const compileFile = function (args, output) {
+
+  let filename, compileAsModule;
+
+  if (typeof args === 'string') {
+    filename = args;
+    compileAsModule = true;
+  } else if (typeof args === 'object') {
+    filename = args.filename;
+    compileAsModule = args.compileAsModule !== false;
+  }
+
+  if (typeof filename !== 'string') {
+    throw new Error(`filename must be a string. ${typeof filename} was given.`);
+  }
+
+  let compiledFilename = args.output || output || filename.slice(0, -3) + COMPILED_EXTNAME;
+
+  if (typeof compiledFilename !== 'string') {
+    throw new Error(`output must be a string. ${typeof compiledFilename} was given.`);
+  }
 
   let javascriptCode = fs.readFileSync(filename, 'utf-8');
 
-  let bytecodeBuffer = compileCode(Module.wrap(javascriptCode.replace(/^#!.*/, '')));
+  let bytecodeBuffer;
 
-  let compiledFilename = output || filename.slice(0, -3) + COMPILED_EXTNAME;
+  if (compileAsModule) {
+    bytecodeBuffer = compileCode(Module.wrap(javascriptCode.replace(/^#!.*/, '')));
+  } else {
+    bytecodeBuffer = compileCode(javascriptCode.replace(/^#!.*/, ''));
+  }
 
   fs.writeFileSync(compiledFilename, bytecodeBuffer);
 
@@ -81,6 +125,10 @@ const compileFile = function (filename, output) {
 };
 
 const runBytecodeFile = function (filename) {
+
+  if (typeof filename !== 'string') {
+    throw new Error(`filename must be a string. ${typeof filename} was given.`);
+  }
 
   let bytecodeBuffer = fs.readFileSync(filename);
 
@@ -95,7 +143,11 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   let length = readSourceHash(bytecodeBuffer);
 
-  let dummyCode = '"' + "\u200b".repeat(length - 2) + '"'; // "\u200b" Zero width space
+  let dummyCode = "";
+
+  if (length > 1) {
+    dummyCode = '"' + "\u200b".repeat(length - 2) + '"'; // "\u200b" Zero width space
+  }
 
   let script = new vm.Script(dummyCode, {
     filename: filename,
