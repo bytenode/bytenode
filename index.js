@@ -45,6 +45,8 @@ const fixBytecode = function (bytecodeBuffer) {
     // Node is v8.8.x or v8.9.x
     dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
     dummyBytecode.slice(20, 24).copy(bytecodeBuffer, 20);
+  } else if(process.version.startsWith('v12')) {
+    dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
   } else {
     dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
     dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
