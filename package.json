@@ -1,6 +1,6 @@
 {
   "name": "bytenode",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A minimalist bytecode compiler for Node.js",
   "main": "index.js",
   "bin": "cli.js",
