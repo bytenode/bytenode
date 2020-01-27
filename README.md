@@ -20,6 +20,16 @@ sudo npm install -g bytenode
 
 ---
 
+## Known Issues and Limitations
+
+* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/OsamaAbbas/bytenode/issues/29).
+
+* Any code depends on `Function.prototype.toString` function will break, because Bytenode remove the source code from `.jsc` files and put a dummy code instead. See [#34](https://github.com/OsamaAbbas/bytenode/issues/34).
+
+* In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/OsamaAbbas/bytenode/issues/41).
+
+---
+
 ## Bytenode CLI
 
 ```
