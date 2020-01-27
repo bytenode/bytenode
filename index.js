@@ -7,6 +7,7 @@ const path = require('path');
 const Module = require('module');
 
 v8.setFlagsFromString('--no-lazy');
+v8.setFlagsFromString('--no-flush-bytecode'); // Thanks to Stephen Bradshaw (@greenimpala)
 
 const COMPILED_EXTNAME = '.jsc';
 
