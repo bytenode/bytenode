@@ -9,7 +9,7 @@ const spawnSync = require('child_process').spawnSync;
 const bytenode = require('./index.js');
 
 v8.setFlagsFromString('--no-lazy');
-v8.setFlagsFromString('--no-flush-bytecode'); // Thanks to Stephen Bradshaw (@greenimpala)
+v8.setFlagsFromString('--no-flush-bytecode'); // Thanks to A-Parser (@a-parser)
 
 let args = process.argv.slice(2);
 
