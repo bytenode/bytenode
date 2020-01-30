@@ -7,7 +7,10 @@ const path = require('path');
 const Module = require('module');
 
 v8.setFlagsFromString('--no-lazy');
-v8.setFlagsFromString('--no-flush-bytecode'); // Thanks to A-Parser (@a-parser)
+
+try {
+  v8.setFlagsFromString('--no-flush-bytecode'); // Thanks to A-Parser (@a-parser)
+} catch (e) { }
 
 const COMPILED_EXTNAME = '.jsc';
 
@@ -46,7 +49,7 @@ const fixBytecode = function (bytecodeBuffer) {
     // Node is v8.8.x or v8.9.x
     dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
     dummyBytecode.slice(20, 24).copy(bytecodeBuffer, 20);
-  } else if(process.version.startsWith('v12') || process.version.startsWith('v13')) {
+  } else if (process.version.startsWith('v12') || process.version.startsWith('v13')) {
     dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
   } else {
     dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12);
