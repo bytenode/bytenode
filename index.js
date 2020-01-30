@@ -5,6 +5,7 @@ const vm = require('vm');
 const v8 = require('v8');
 const path = require('path');
 const Module = require('module');
+const babel = require("@babel/core");
 
 v8.setFlagsFromString('--no-lazy');
 
@@ -25,7 +26,9 @@ const compileCode = function (javascriptCode) {
     throw new Error(`javascriptCode must be string. ${typeof javascriptCode} was given.`);
   }
 
-  let script = new vm.Script(javascriptCode, {
+  let preparedCode = babel.transformSync(javascriptCode, { plugins: ["@babel/plugin-transform-arrow-functions"], babelrc: false, minified: true }).code;
+
+  let script = new vm.Script(preparedCode, {
     produceCachedData: true
   });
 

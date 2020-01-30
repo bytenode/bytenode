@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/OsamaAbbas/bytenode/issues"
   },
-  "homepage": "https://github.com/OsamaAbbas/bytenode#readme"
+  "homepage": "https://github.com/OsamaAbbas/bytenode#readme",
+  "dependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-transform-arrow-functions": "^7.8.3"
+  }
 }
