@@ -28,6 +28,8 @@ sudo npm install -g bytenode
 
 * In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/OsamaAbbas/bytenode/issues/41).
 
+* Async arrow functions cause crash in Electron apps if used in render processes. See [#47](https://github.com/OsamaAbbas/bytenode/issues/47).
+
 ---
 
 ## Bytenode CLI
