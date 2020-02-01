@@ -26,7 +26,12 @@ const compileCode = function (javascriptCode) {
     throw new Error(`javascriptCode must be string. ${typeof javascriptCode} was given.`);
   }
 
-  let preparedCode = babel.transformSync(javascriptCode, { plugins: ["@babel/plugin-transform-arrow-functions"], babelrc: false, minified: true }).code;
+  let preparedCode;
+  try {
+    preparedCode = babel.transformSync(javascriptCode, { plugins: ["@babel/plugin-transform-arrow-functions"], babelrc: false, minified: true }).code;
+  } catch {
+    preparedCode = javascriptCode;
+  }
 
   let script = new vm.Script(preparedCode, {
     produceCachedData: true
