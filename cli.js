@@ -25,6 +25,10 @@ if (args.includes('-v')) {
   args[args.indexOf('-v')] = '--version';
 }
 
+if (args.includes('-n')) {
+  args[args.indexOf('-n')] = '--no-module';
+}
+
 const program = {
   dirname: __dirname,
   filename: __filename,
