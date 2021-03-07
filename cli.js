@@ -69,7 +69,11 @@ if (program.flags.includes('--compile')) {
     process.stdin.on('end', () => {
 
       try {
-        process.stdout.write(bytenode.compileCode(wrap(script)));
+        if (program.flags.includes('--no-module')) {
+          process.stdout.write(bytenode.compileCode(script));
+        } else {
+          process.stdout.write(bytenode.compileCode(wrap(script)));
+        }
       } catch (error) {
         console.error(error);
       }
