@@ -43,6 +43,7 @@ sudo npm install -g bytenode
 
     -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
     -n, --no-module                   compile without producing commonjs module
+    -e, --electron                    compile for Electron
 
   Examples:
 

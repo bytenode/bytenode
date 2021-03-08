@@ -29,6 +29,10 @@ if (args.includes('-n')) {
   args[args.indexOf('-n')] = '--no-module';
 }
 
+if (args.includes('-e')) {
+  args[args.indexOf('-e')] = '--electron';
+}
+
 const program = {
   dirname: __dirname,
   filename: __filename,
@@ -39,16 +43,17 @@ const program = {
 
 if (program.flags.includes('--compile')) {
 
-  program.files.forEach(function (filename) {
+  program.files.forEach(async function (filename) {
 
     filename = path.resolve(filename);
 
     if (fs.existsSync(filename) && fs.statSync(filename).isFile()) {
 
       let compileAsModule = !program.flags.includes('--no-module');
+      let electron = program.flags.includes('--electron')
 
       try {
-        bytenode.compileFile({ filename, compileAsModule });
+        await bytenode.compileFile({ filename, compileAsModule, electron});
       } catch (error) {
         console.error(error);
       }
@@ -96,6 +101,7 @@ else if (program.flags.includes('--help')) {
 
     -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
     -n, --no-module                   compile without producing commonjs module
+    -e, --electron                    compile for Electron
 
   Examples:
 
