@@ -25,6 +25,10 @@ if (args.includes('-v')) {
   args[args.indexOf('-v')] = '--version';
 }
 
+if (args.includes('-n')) {
+  args[args.indexOf('-n')] = '--no-module';
+}
+
 const program = {
   dirname: __dirname,
   filename: __filename,
@@ -69,7 +73,11 @@ if (program.flags.includes('--compile')) {
     process.stdin.on('end', () => {
 
       try {
-        process.stdout.write(bytenode.compileCode(wrap(script)));
+        if (program.flags.includes('--no-module')) {
+          process.stdout.write(bytenode.compileCode(script));
+        } else {
+          process.stdout.write(bytenode.compileCode(wrap(script)));
+        }
       } catch (error) {
         console.error(error);
       }
