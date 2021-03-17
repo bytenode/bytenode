@@ -47,46 +47,46 @@ const compileCode = function (javascriptCode) {
 const compileElectronCode = function (javascriptCode) {
   // console.log('\nCompiling with Electron\n')
   return new Promise((resolve, reject) => {
-    let data = Buffer.from([])
+    let data = Buffer.from([]);
 
     const electronPath = path.join('node_modules', 'electron', 'cli.js')
-    const bytenodePath = path.join(__dirname, 'cli.js')
+    const bytenodePath = path.join(__dirname, 'cli.js');
 
     // create a subprocess in which we run Electron as our Node and V8 engine
     // running Bytenode to compile our code through stdin/stdout
     const proc = fork(electronPath, [bytenodePath, '--compile', '--no-module', '-'], {
       env: { ELECTRON_RUN_AS_NODE: '1' },
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-    })
+    });
 
-    proc.stdin?.write(javascriptCode)
-    proc.stdin?.end()
+    proc.stdin?.write(javascriptCode);
+    proc.stdin?.end();
 
     proc.stdout?.on('data', (chunk) => {
-      data = Buffer.concat([data, chunk])
+      data = Buffer.concat([data, chunk]);
     })
 
     proc.stdout?.on('error', (err) => {
-      console.error(err)
+      console.error(err);
     })
     proc.stdout?.on('end', () => {
-      resolve(data)
+      resolve(data);
     })
 
     proc.stderr?.on('data', (chunk) => {
-      console.error('Error: ', chunk)
+      console.error('Error: ', chunk);
     })
     proc.stderr?.on('error', (err) => {
-      console.error('Error: ', err)
+      console.error('Error: ', err);
     })
 
-    proc.addListener('message', (message) => console.log(message))
-    proc.addListener('error', err => console.error(err))
+    proc.addListener('message', (message) => console.log(message));
+    proc.addListener('error', err => console.error(err));
 
-    proc.on('error', (err) => reject(err))
-    proc.on('exit', () => { resolve(data) })
-  })
-}
+    proc.on('error', (err) => reject(err));
+    proc.on('exit', () => { resolve(data) });
+  });
+};
 
 // TODO: rewrite this function
 const fixBytecode = function (bytecodeBuffer) {
