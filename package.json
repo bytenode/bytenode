@@ -5,7 +5,7 @@
   "main": "index.js",
   "bin": "cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/OsamaAbbas/bytenode/issues"
   },
-  "homepage": "https://github.com/OsamaAbbas/bytenode#readme"
+  "homepage": "https://github.com/OsamaAbbas/bytenode#readme",
+  "devDependencies": {
+    "electron": "^12.0.1",
+    "mocha": "^8.3.2"
+  }
 }
