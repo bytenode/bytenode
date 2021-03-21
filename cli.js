@@ -51,7 +51,7 @@ if (args.includes('--loader')) {
     args.splice(nextIndex, 1);
   }
 }
-
+  
 const program = {
   dirname: __dirname,
   filename: __filename,
