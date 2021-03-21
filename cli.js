@@ -33,6 +33,25 @@ if (args.includes('-e')) {
   args[args.indexOf('-e')] = '--electron';
 }
 
+if (args.includes('-l')) {
+  args[args.indexOf('-l')] = '--loader';
+}
+
+let loaderFilename = false;
+let createLoaderFile = false;
+
+if (args.includes('--loader')) {
+  createLoaderFile = true;
+  const nextIndex = args.indexOf('--loader') + 1;
+  const nextItem = args[nextIndex];
+  if (nextItem && nextItem[0] !== '-') {
+    loaderFilename = nextItem;
+    // remove the loader filename from the args so it
+    // isn't mistaken for a file to compile
+    args.splice(nextIndex, 1);
+  }
+}
+
 const program = {
   dirname: __dirname,
   filename: __filename,
@@ -53,7 +72,7 @@ if (program.flags.includes('--compile')) {
       let electron = program.flags.includes('--electron')
 
       try {
-        await bytenode.compileFile({ filename, compileAsModule, electron});
+        await bytenode.compileFile({ filename, compileAsModule, electron, createLoaderFile, loaderFilename });
       } catch (error) {
         console.error(error);
       }
@@ -102,6 +121,10 @@ else if (program.flags.includes('--help')) {
     -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
     -n, --no-module                   compile without producing commonjs module
     -e, --electron                    compile for Electron
+
+    -l, --loader [ FILE | PATTERN ]   create a loader file and optionally define
+                                      loader filename or pattern using % as filename replacer
+                                      defaults to %.loader.js
 
   Examples:
 

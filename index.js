@@ -166,21 +166,27 @@ const runBytecode = function (bytecodeBuffer) {
  * @param   {boolean}         [args.compileAsModule=true] If true, the output will be a commonjs module
  * @param   {string}          [args.output=filename.jsc] The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension.
  * @param   {boolean}         [args.electron=false] If true, compile code for Electron (which needs to be installed)
+ * @param   {boolean}         [args.createLoader=false] If true, create a loader file.
+ * @param   {boolean}         [args.loaderFilename='%.loader.js'] Filename or pattern for generated loader files. Defaults to originalFilename.loader.js. Use % as a substitute for originalFilename. 
  * @param   {string}        [output] The output filename. (Deprecated: use args.output instead)
  * @returns {Promise<string>}        A Promise which returns the compiled filename
  */
 const compileFile = async function (args, output) {
 
-  let filename, compileAsModule, electron;
+  let filename, compileAsModule, createLoader, loaderFilename;
 
   if (typeof args === 'string') {
     filename = args;
     compileAsModule = true;
     electron = false;
+    createLoader = false;
   } else if (typeof args === 'object') {
     filename = args.filename;
     compileAsModule = args.compileAsModule !== false;
     electron = args.electron;
+    createLoader = true;
+    loaderFilename = args.loaderFilename;
+    if (loaderFilename) createLoader = true;
   }
 
   if (typeof filename !== 'string') {
@@ -212,6 +218,10 @@ const compileFile = async function (args, output) {
   }
 
   fs.writeFileSync(compiledFilename, bytecodeBuffer);
+
+  if (createLoader) {
+    addLoaderFile(compiledFilename, loaderFilename)
+  }
 
   return compiledFilename;
 };
@@ -289,9 +299,35 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
   return compiledWrapper.apply(module.exports, args);
 };
 
+/**
+ * Add a loader file for a given .jsc file
+ * @param {String} fileToLoad path of the .jsc file we're loading
+ * @param {String} loaderFilename - optional pattern or name of the file to write - defaults to filename.loader.js. Patterns: "%" represents the root name of .jsc file.
+ */
+function addLoaderFile(fileToLoad, loaderFilename) {
+  let loaderFilePath;
+  if (typeof loaderFilename === 'boolean' || loaderFilename === undefined || loaderFilename === '') {
+    loaderFilePath = fileToLoad.replace('.jsc', '.loader.js');
+  } else {
+    loaderFilename = loaderFilename.replace('%', path.parse(fileToLoad).name);
+    loaderFilePath = path.join(path.dirname(fileToLoad), loaderFilename);
+  }
+  const relativePath = path.relative(path.dirname(loaderFilePath), fileToLoad);
+  const code = loaderCode(relativePath);
+  fs.writeFileSync(loaderFilePath, code);
+}
+
+function loaderCode(relativePath) {
+  return `
+    const bytenode = require('bytenode');
+    require('./${relativePath}');
+  `
+};
+
 global.bytenode = {
-  compileCode, compileFile, compileElectronCode,
-  runBytecode, runBytecodeFile
+  compileCode, compileFile,
+  runBytecode, runBytecodeFile,
+  addLoaderFile, loaderCode
 };
 
 module.exports = global.bytenode;
