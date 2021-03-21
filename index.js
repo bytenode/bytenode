@@ -173,7 +173,7 @@ const runBytecode = function (bytecodeBuffer) {
  */
 const compileFile = async function (args, output) {
 
-  let filename, compileAsModule, createLoader, loaderFilename;
+  let filename, compileAsModule, electron, createLoader, loaderFilename;
 
   if (typeof args === 'string') {
     filename = args;
@@ -325,7 +325,7 @@ function loaderCode(relativePath) {
 };
 
 global.bytenode = {
-  compileCode, compileFile,
+  compileCode, compileFile, compileElectronCode,
   runBytecode, runBytecodeFile,
   addLoaderFile, loaderCode
 };
