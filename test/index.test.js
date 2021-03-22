@@ -5,9 +5,7 @@ const path = require('path')
 const bytenode = require('../index')
 
 const TEMP_DIR = 'temp'
-
 const TEST_FILE = 'testfile.js'
-
 const TEST_CODE = "console.log('      Greetings from Bytenode!');"
 
 describe('Bytenode', () => {
@@ -54,12 +52,18 @@ describe('Bytenode', () => {
     const outputFile = path.join(tempPath, TEST_FILE.replace('.js', '.jsc'))
     const loaderFile = path.join(tempPath, TEST_FILE)
 
-    it('creates a file and loader', async () => {
-      await assert.doesNotReject(async () => {
-        await bytenode.compileFile({
-          filename: testFilePath,
-          output: outputFile,
-          loaderFilename: '%.js'
+    it('creates non-zero length binary and loader files', async () => {
+      await assert.doesNotReject(() => {
+        return new Promise((resolve, reject) => {
+          try {
+            bytenode.compileFile({
+              filename: testFilePath,
+              output: outputFile,
+              loaderFilename: '%.js'
+            }).then(() => resolve())
+          } catch (err) {
+            reject(err)
+          }
         })
       })
       const jscStats = fs.statSync(outputFile)
@@ -96,13 +100,19 @@ describe('Bytenode', () => {
     const outputFile = path.join(tempPath, TEST_FILE.replace('.js', '.jsc'))
     const loaderFile = path.join(tempPath, TEST_FILE)
 
-    it('creates a file and loader', async () => {
-      await assert.doesNotReject(async () => {
-        await bytenode.compileFile({
-          filename: testFilePath,
-          output: outputFile,
-          loaderFilename: '%.js',
-          electron: true
+    it('creates non-zero length binary and loader files', async () => {
+      await assert.doesNotReject(() => {
+        return new Promise((resolve, reject) => {
+          try {
+            bytenode.compileFile({
+              filename: testFilePath,
+              output: outputFile,
+              loaderFilename: '%.js',
+              electron: true
+            }).then(() => resolve())
+          } catch (err) {
+            reject(err)
+          }
         })
       })
       const jscStats = fs.statSync(outputFile)
@@ -113,19 +123,19 @@ describe('Bytenode', () => {
       assert.ok(loaderStats.size, 'Zero Length Loader File')
     })
 
-    it('runs the .jsc file via Electron', () => {
-      assert.doesNotReject(() => {
+    it('runs the .jsc file via Electron', async () => {
+      await assert.doesNotReject(() => {
         return new Promise((resolve, reject) => {
           const electronPath = path.join('node_modules', 'electron', 'cli.js')
-          const bytenodePath = path.join(__dirname, 'cli.js')
+          const bytenodePath = path.resolve(__dirname, '../cli.js')
           const proc = fork(electronPath, [bytenodePath, outputFile], {
-            env: { ELECTRON_RUN_AS_NODE: '1' },
-            stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+            env: { ELECTRON_RUN_AS_NODE: '1' }
           })
+          proc.on('message', message => console.log(message))
           proc.on('error', (err) => reject(err))
-          proc.on('exit', () => { resolve() })
+          proc.on('exit', () => resolve())
         })
-      }, 'Error While Running Loader File')
+      }, 'Rejected While Running .jsc in Electron')
     })
 
     after(() => {
@@ -134,6 +144,4 @@ describe('Bytenode', () => {
       }
     })
   })
-
-
 })
