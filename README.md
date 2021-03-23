@@ -45,11 +45,17 @@ sudo npm install -g bytenode
     -n, --no-module                   compile without producing commonjs module
     -e, --electron                    compile for Electron
 
+    -l, --loader [ FILE | PATTERN ]   create a loader file and optionally define
+                                      loader filename or pattern using % as filename replacer
+                                      defaults to %.loader.js
+
   Examples:
 
   $ bytenode -c script.js             compile `script.js` to `script.jsc`.
   $ bytenode -c server.js app.js
   $ bytenode -c src/*.js              compile all `.js` files in `src/` directory.
+  
+  $ bytenode -c *.js -l %.load.js     create `filename.load.js` loader files along side `.jsc` files
 
   $ bytenode script.jsc [arguments]   run `script.jsc` with arguments.
   $ bytenode                          open Node REPL with bytenode pre-loaded.
