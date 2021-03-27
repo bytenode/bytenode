@@ -49,7 +49,10 @@ const compileElectronCode = function (javascriptCode) {
   return new Promise((resolve, reject) => {
     let data = Buffer.from([]);
 
-    const electronPath = path.join('node_modules', 'electron', 'cli.js')
+    const electronPath = path.join('node_modules', 'electron', 'cli.js');
+    if (!fs.existsSync(electronPath)) {
+      throw new Error('Electron not installed');
+    }
     const bytenodePath = path.join(__dirname, 'cli.js');
 
     // create a subprocess in which we run Electron as our Node and V8 engine
