@@ -2,8 +2,8 @@
   "name": "bytenode",
   "version": "1.2.3",
   "description": "A minimalist bytecode compiler for Node.js",
-  "main": "build/index.js",
-  "bin": "build/cli.js",
+  "main": "dist/index.js",
+  "bin": "dist/cli.js",
   "scripts": {
     "build": "tsc",
     "test": "tsc; ts-mocha './{,!(node_modules)/**}/*.test.ts'"

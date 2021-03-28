@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { describe, it, before, after } from 'mocha'
 
-import * as bytenode from '../build'
+import * as bytenode from '../dist'
 
 const TEMP_DIR = 'temp'
 const TEST_FILE = 'testfile.js'
@@ -130,7 +130,7 @@ describe('Bytenode', () => {
       await assert.doesNotReject((): Promise<void> => {
         return new Promise((resolve, reject) => {
           const electronPath = path.join('node_modules', 'electron', 'cli.js')
-          const bytenodePath = path.resolve(__dirname, '../build/cli.js')
+          const bytenodePath = path.resolve(__dirname, '../dist/cli.js')
           const proc = fork(electronPath, [bytenodePath, outputFile], {
             env: { ELECTRON_RUN_AS_NODE: '1' }
           })
