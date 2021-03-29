@@ -62,24 +62,24 @@ const compileElectronCode = function (javascriptCode) {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     });
 
-    proc.stdin?.write(javascriptCode);
-    proc.stdin?.end();
+    proc.stdin.write(javascriptCode);
+    proc.stdin.end();
 
-    proc.stdout?.on('data', (chunk) => {
+    proc.stdout.on('data', (chunk) => {
       data = Buffer.concat([data, chunk]);
     })
 
-    proc.stdout?.on('error', (err) => {
+    proc.stdout.on('error', (err) => {
       console.error(err);
     })
-    proc.stdout?.on('end', () => {
+    proc.stdout.on('end', () => {
       resolve(data);
     })
 
-    proc.stderr?.on('data', (chunk) => {
+    proc.stderr.on('data', (chunk) => {
       console.error('Error: ', chunk);
     })
-    proc.stderr?.on('error', (err) => {
+    proc.stderr.on('error', (err) => {
       console.error('Error: ', err);
     })
 
