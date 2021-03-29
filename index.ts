@@ -59,26 +59,31 @@ export const compileElectronCode = function (javascriptCode: string): Promise<Bu
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     })
 
-    proc.stdin?.write(javascriptCode)
-    proc.stdin?.end()
+    if (proc.stdin) {
+      proc.stdin.write(javascriptCode)
+      proc.stdin.end()
+    }
 
-    proc.stdout?.on('data', (chunk) => {
-      data = Buffer.concat([data, chunk])
-    })
+    if (proc.stdout) {
+      proc.stdout.on('data', (chunk) => {
+        data = Buffer.concat([data, chunk])
+      })
+      proc.stdout.on('error', (err) => {
+        console.error(err)
+      })
+      proc.stdout.on('end', () => {
+        resolve(data)
+      })
+    }
 
-    proc.stdout?.on('error', (err) => {
-      console.error(err)
-    })
-    proc.stdout?.on('end', () => {
-      resolve(data)
-    })
-
-    proc.stderr?.on('data', (chunk) => {
-      console.error('Error: ', chunk)
-    })
-    proc.stderr?.on('error', (err) => {
-      console.error('Error: ', err)
-    })
+    if (proc.stderr) {
+      proc.stderr.on('data', (chunk) => {
+        console.error('Error: ', chunk)
+      })
+      proc.stderr.on('error', (err) => {
+        console.error('Error: ', err)
+      })
+    }
 
     proc.addListener('message', (message) => console.log(message))
     proc.addListener('error', err => console.error(err))

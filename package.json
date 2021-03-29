@@ -6,7 +6,8 @@
   "bin": "dist/cli.js",
   "scripts": {
     "build": "tsc",
-    "test": "tsc; ts-mocha './{,!(node_modules)/**}/*.test.ts'"
+    "pretest": "tsc",
+    "test": "ts-mocha './{,!(node_modules)/**}/*.test.ts'"
   },
   "repository": {
     "type": "git",
