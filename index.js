@@ -316,16 +316,16 @@ function addLoaderFile(fileToLoad, loaderFilename) {
     loaderFilePath = path.join(path.dirname(fileToLoad), loaderFilename);
   }
   const relativePath = path.relative(path.dirname(loaderFilePath), fileToLoad);
-  const code = loaderCode(relativePath);
+  const code = loaderCode('./' + relativePath);
   fs.writeFileSync(loaderFilePath, code);
 }
 
-function loaderCode(relativePath) {
+function loaderCode(targetPath) {
   return `
-    const bytenode = require('bytenode');
-    require('./${relativePath}');
-  `
-};
+    require('bytenode');
+    require('${targetPath}');
+  `;
+}
 
 global.bytenode = {
   compileCode, compileFile, compileElectronCode,
