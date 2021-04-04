@@ -3,6 +3,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loaderCode = exports.addLoaderFile = exports.runBytecodeFile = exports.compileFile = exports.runBytecode = exports.compileElectronCode = exports.compileCode = void 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f169a74 (Fixing optional chaining for Node 10)
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const vm_1 = tslib_1.__importDefault(require("vm"));
@@ -10,6 +13,7 @@ const v8_1 = tslib_1.__importDefault(require("v8"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const child_process_1 = require("child_process");
 const module_1 = tslib_1.__importDefault(require("module"));
+<<<<<<< HEAD
 =======
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -32,6 +36,8 @@ var path_1 = tslib_1.__importDefault(require("path"));
 var child_process_1 = require("child_process");
 var module_1 = tslib_1.__importDefault(require("module"));
 >>>>>>> 4b04431 (Incorporating recent pulls)
+=======
+>>>>>>> f169a74 (Fixing optional chaining for Node 10)
 v8_1.default.setFlagsFromString('--no-lazy');
 if (Number.parseInt(process.versions.node.split('.')[0], 10) >= 12) {
     v8_1.default.setFlagsFromString('--no-flush-bytecode');
@@ -51,6 +57,7 @@ var compileCode = function (javascriptCode) {
 };
 exports.compileCode = compileCode;
 <<<<<<< HEAD
+<<<<<<< HEAD
 const compileElectronCode = function (javascriptCode) {
     return new Promise((resolve, reject) => {
 <<<<<<< HEAD
@@ -65,6 +72,12 @@ var compileElectronCode = function (javascriptCode) {
         var data = Buffer.from([]);
         var electronPath = path_1.default.join('node_modules', 'electron', 'cli.js');
 >>>>>>> 4b04431 (Incorporating recent pulls)
+=======
+const compileElectronCode = function (javascriptCode) {
+    return new Promise((resolve, reject) => {
+        let data = Buffer.from([]);
+        const electronPath = path_1.default.join('node_modules', 'electron', 'cli.js');
+>>>>>>> f169a74 (Fixing optional chaining for Node 10)
         if (!fs_1.default.existsSync(electronPath)) {
             throw new Error('Electron not installed');
         }
@@ -79,24 +92,25 @@ var compileElectronCode = function (javascriptCode) {
             proc.stdin.end();
         }
         if (proc.stdout) {
-            proc.stdout.on('data', function (chunk) {
+            proc.stdout.on('data', (chunk) => {
                 data = Buffer.concat([data, chunk]);
             });
-            proc.stdout.on('error', function (err) {
+            proc.stdout.on('error', (err) => {
                 console.error(err);
             });
-            proc.stdout.on('end', function () {
+            proc.stdout.on('end', () => {
                 resolve(data);
             });
         }
         if (proc.stderr) {
-            proc.stderr.on('data', function (chunk) {
+            proc.stderr.on('data', (chunk) => {
                 console.error('Error: ', chunk);
             });
-            proc.stderr.on('error', function (err) {
+            proc.stderr.on('error', (err) => {
                 console.error('Error: ', err);
             });
         }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
         (_a = proc.stdin) === null || _a === void 0 ? void 0 : _a.write(javascriptCode);
@@ -117,16 +131,21 @@ var compileElectronCode = function (javascriptCode) {
             console.error('Error: ', err);
         });
 >>>>>>> c8aefc4 (Renaming “build” dir to “dist”)
+=======
+>>>>>>> f169a74 (Fixing optional chaining for Node 10)
         proc.addListener('message', (message) => console.log(message));
         proc.addListener('error', err => console.error(err));
         proc.on('error', (err) => reject(err));
         proc.on('exit', () => { resolve(data); });
+<<<<<<< HEAD
 =======
         proc.addListener('message', function (message) { return console.log(message); });
         proc.addListener('error', function (err) { return console.error(err); });
         proc.on('error', function (err) { return reject(err); });
         proc.on('exit', function () { resolve(data); });
 >>>>>>> 4b04431 (Incorporating recent pulls)
+=======
+>>>>>>> f169a74 (Fixing optional chaining for Node 10)
     });
 };
 exports.compileElectronCode = compileElectronCode;

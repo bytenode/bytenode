@@ -2,13 +2,13 @@
 "use strict";
 <<<<<<< HEAD
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var fs_1 = tslib_1.__importDefault(require("fs"));
-var path_1 = tslib_1.__importDefault(require("path"));
-var module_1 = require("module");
-var child_process_1 = require("child_process");
-var bytenode = tslib_1.__importStar(require("./index"));
-var args = process.argv.slice(2);
+const tslib_1 = require("tslib");
+const fs_1 = tslib_1.__importDefault(require("fs"));
+const path_1 = tslib_1.__importDefault(require("path"));
+const module_1 = require("module");
+const child_process_1 = require("child_process");
+const bytenode = tslib_1.__importStar(require("./index"));
+const args = process.argv.slice(2);
 if (args.includes('-c')) {
     args[args.indexOf('-c')] = '--compile';
 }
