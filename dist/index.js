@@ -1,5 +1,6 @@
 "use strict";
 <<<<<<< HEAD
+<<<<<<< HEAD
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loaderCode = exports.addLoaderFile = exports.runBytecodeFile = exports.compileFile = exports.runBytecode = exports.compileElectronCode = exports.compileCode = void 0;
 <<<<<<< HEAD
@@ -38,19 +39,32 @@ var module_1 = tslib_1.__importDefault(require("module"));
 >>>>>>> 4b04431 (Incorporating recent pulls)
 =======
 >>>>>>> f169a74 (Fixing optional chaining for Node 10)
+=======
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.loaderCode = exports.addLoaderFile = exports.runBytecodeFile = exports.compileFile = exports.runBytecode = exports.compileElectronCode = exports.compileCode = void 0;
+const fs_1 = __importDefault(require("fs"));
+const vm_1 = __importDefault(require("vm"));
+const v8_1 = __importDefault(require("v8"));
+const path_1 = __importDefault(require("path"));
+const child_process_1 = require("child_process");
+const module_1 = __importDefault(require("module"));
+>>>>>>> 8baacf8 (Renaming “build” dir to “dist”)
 v8_1.default.setFlagsFromString('--no-lazy');
 if (Number.parseInt(process.versions.node.split('.')[0], 10) >= 12) {
     v8_1.default.setFlagsFromString('--no-flush-bytecode');
 }
-var COMPILED_EXTNAME = '.jsc';
-var compileCode = function (javascriptCode) {
+const COMPILED_EXTNAME = '.jsc';
+const compileCode = function (javascriptCode) {
     if (typeof javascriptCode !== 'string') {
-        throw new Error("javascriptCode must be string. " + typeof javascriptCode + " was given.");
+        throw new Error(`javascriptCode must be string. ${typeof javascriptCode} was given.`);
     }
-    var script = new vm_1.default.Script(javascriptCode, {
+    const script = new vm_1.default.Script(javascriptCode, {
         produceCachedData: true
     });
-    var bytecodeBuffer = (script.createCachedData && script.createCachedData.call)
+    const bytecodeBuffer = (script.createCachedData && script.createCachedData.call)
         ? script.createCachedData()
         : script.cachedData;
     return bytecodeBuffer;
@@ -61,9 +75,13 @@ exports.compileCode = compileCode;
 const compileElectronCode = function (javascriptCode) {
     return new Promise((resolve, reject) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         var _a, _b, _c, _d, _e, _f, _g;
 >>>>>>> c8aefc4 (Renaming “build” dir to “dist”)
+=======
+        var _a, _b, _c, _d, _e, _f, _g;
+>>>>>>> 8baacf8 (Renaming “build” dir to “dist”)
         let data = Buffer.from([]);
         const electronPath = path_1.default.join('node_modules', 'electron', 'cli.js');
 =======
@@ -81,11 +99,12 @@ const compileElectronCode = function (javascriptCode) {
         if (!fs_1.default.existsSync(electronPath)) {
             throw new Error('Electron not installed');
         }
-        var bytenodePath = path_1.default.join(__dirname, 'cli.js');
-        var proc = child_process_1.fork(electronPath, [bytenodePath, '--compile', '--no-module', '-'], {
+        const bytenodePath = path_1.default.join(__dirname, 'cli.js');
+        const proc = child_process_1.fork(electronPath, [bytenodePath, '--compile', '--no-module', '-'], {
             env: { ELECTRON_RUN_AS_NODE: '1' },
             stdio: ['pipe', 'pipe', 'pipe', 'ipc']
         });
+<<<<<<< HEAD
 <<<<<<< HEAD
         if (proc.stdin) {
             proc.stdin.write(javascriptCode);
@@ -113,6 +132,8 @@ const compileElectronCode = function (javascriptCode) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> 8baacf8 (Renaming “build” dir to “dist”)
         (_a = proc.stdin) === null || _a === void 0 ? void 0 : _a.write(javascriptCode);
         (_b = proc.stdin) === null || _b === void 0 ? void 0 : _b.end();
         (_c = proc.stdout) === null || _c === void 0 ? void 0 : _c.on('data', (chunk) => {
@@ -130,9 +151,12 @@ const compileElectronCode = function (javascriptCode) {
         (_g = proc.stderr) === null || _g === void 0 ? void 0 : _g.on('error', (err) => {
             console.error('Error: ', err);
         });
+<<<<<<< HEAD
 >>>>>>> c8aefc4 (Renaming “build” dir to “dist”)
 =======
 >>>>>>> f169a74 (Fixing optional chaining for Node 10)
+=======
+>>>>>>> 8baacf8 (Renaming “build” dir to “dist”)
         proc.addListener('message', (message) => console.log(message));
         proc.addListener('error', err => console.error(err));
         proc.on('error', (err) => reject(err));
@@ -149,11 +173,11 @@ const compileElectronCode = function (javascriptCode) {
     });
 };
 exports.compileElectronCode = compileElectronCode;
-var fixBytecode = function (bytecodeBuffer) {
+const fixBytecode = function (bytecodeBuffer) {
     if (!Buffer.isBuffer(bytecodeBuffer)) {
         throw new Error('bytecodeBuffer must be a buffer object.');
     }
-    var dummyBytecode = exports.compileCode('"ಠ_ಠ"');
+    const dummyBytecode = exports.compileCode('"ಠ_ಠ"');
     if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
         dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
         dummyBytecode.slice(20, 24).copy(bytecodeBuffer, 20);
@@ -169,28 +193,28 @@ var fixBytecode = function (bytecodeBuffer) {
         dummyBytecode.slice(16, 20).copy(bytecodeBuffer, 16);
     }
 };
-var readSourceHash = function (bytecodeBuffer) {
+const readSourceHash = function (bytecodeBuffer) {
     if (!Buffer.isBuffer(bytecodeBuffer)) {
         throw new Error('bytecodeBuffer must be a buffer object.');
     }
     if (process.version.startsWith('v8.8') || process.version.startsWith('v8.9')) {
-        return bytecodeBuffer.slice(12, 16).reduce(function (sum, number, power) { return sum += number * Math.pow(256, power); }, 0);
+        return bytecodeBuffer.slice(12, 16).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
     }
     else {
-        return bytecodeBuffer.slice(8, 12).reduce(function (sum, number, power) { return sum += number * Math.pow(256, power); }, 0);
+        return bytecodeBuffer.slice(8, 12).reduce((sum, number, power) => sum += number * Math.pow(256, power), 0);
     }
 };
-var runBytecode = function (bytecodeBuffer) {
+const runBytecode = function (bytecodeBuffer) {
     if (!Buffer.isBuffer(bytecodeBuffer)) {
         throw new Error('bytecodeBuffer must be a buffer object.');
     }
     fixBytecode(bytecodeBuffer);
-    var length = readSourceHash(bytecodeBuffer);
-    var dummyCode = '';
+    const length = readSourceHash(bytecodeBuffer);
+    let dummyCode = '';
     if (length > 1) {
         dummyCode = '"' + '\u200b'.repeat(length - 2) + '"';
     }
-    var script = new vm_1.default.Script(dummyCode, {
+    const script = new vm_1.default.Script(dummyCode, {
         cachedData: bytecodeBuffer
     });
     if (script.cachedDataRejected) {
@@ -199,77 +223,69 @@ var runBytecode = function (bytecodeBuffer) {
     return script.runInThisContext();
 };
 exports.runBytecode = runBytecode;
-var compileFile = function (args, output) {
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var filename, compileAsModule, electron, createLoader, loaderFilename, compiledFilename, javascriptCode, code, bytecodeBuffer;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (typeof args === 'string') {
-                        filename = args;
-                        compileAsModule = true;
-                        electron = false;
-                        createLoader = false;
-                    }
-                    else if (typeof args === 'object') {
-                        filename = args.filename;
-                        compileAsModule = args.compileAsModule !== false;
-                        electron = args.electron;
-                        createLoader = true;
-                        loaderFilename = args.loaderFilename;
-                        if (loaderFilename)
-                            createLoader = true;
-                    }
-                    if (typeof filename !== 'string') {
-                        throw new Error("filename must be a string. " + typeof filename + " was given.");
-                    }
-                    compiledFilename = args.output || output || filename.slice(0, -3) + COMPILED_EXTNAME;
-                    if (typeof compiledFilename !== 'string') {
-                        throw new Error("output must be a string. " + typeof compiledFilename + " was given.");
-                    }
-                    javascriptCode = fs_1.default.readFileSync(filename, 'utf-8');
-                    if (compileAsModule) {
-                        code = module_1.default.wrap(javascriptCode.replace(/^#!.*/, ''));
-                    }
-                    else {
-                        code = javascriptCode.replace(/^#!.*/, '');
-                    }
-                    if (!electron) return [3, 2];
-                    return [4, exports.compileElectronCode(code)];
-                case 1:
-                    bytecodeBuffer = _a.sent();
-                    return [3, 3];
-                case 2:
-                    bytecodeBuffer = exports.compileCode(code);
-                    _a.label = 3;
-                case 3:
-                    fs_1.default.writeFileSync(compiledFilename, bytecodeBuffer);
-                    if (createLoader) {
-                        addLoaderFile(compiledFilename, loaderFilename);
-                    }
-                    return [2, compiledFilename];
-            }
-        });
-    });
+const compileFile = async function (args, output) {
+    let filename, compileAsModule, electron, createLoader, loaderFilename;
+    if (typeof args === 'string') {
+        filename = args;
+        compileAsModule = true;
+        electron = false;
+        createLoader = false;
+    }
+    else if (typeof args === 'object') {
+        filename = args.filename;
+        compileAsModule = args.compileAsModule !== false;
+        electron = args.electron;
+        createLoader = true;
+        loaderFilename = args.loaderFilename;
+        if (loaderFilename)
+            createLoader = true;
+    }
+    if (typeof filename !== 'string') {
+        throw new Error(`filename must be a string. ${typeof filename} was given.`);
+    }
+    const compiledFilename = args.output || output || filename.slice(0, -3) + COMPILED_EXTNAME;
+    if (typeof compiledFilename !== 'string') {
+        throw new Error(`output must be a string. ${typeof compiledFilename} was given.`);
+    }
+    const javascriptCode = fs_1.default.readFileSync(filename, 'utf-8');
+    let code;
+    if (compileAsModule) {
+        code = module_1.default.wrap(javascriptCode.replace(/^#!.*/, ''));
+    }
+    else {
+        code = javascriptCode.replace(/^#!.*/, '');
+    }
+    let bytecodeBuffer;
+    if (electron) {
+        bytecodeBuffer = await exports.compileElectronCode(code);
+    }
+    else {
+        bytecodeBuffer = exports.compileCode(code);
+    }
+    fs_1.default.writeFileSync(compiledFilename, bytecodeBuffer);
+    if (createLoader) {
+        addLoaderFile(compiledFilename, loaderFilename);
+    }
+    return compiledFilename;
 };
 exports.compileFile = compileFile;
-var runBytecodeFile = function (filename) {
+const runBytecodeFile = function (filename) {
     if (typeof filename !== 'string') {
-        throw new Error("filename must be a string. " + typeof filename + " was given.");
+        throw new Error(`filename must be a string. ${typeof filename} was given.`);
     }
-    var bytecodeBuffer = fs_1.default.readFileSync(filename);
+    const bytecodeBuffer = fs_1.default.readFileSync(filename);
     return exports.runBytecode(bytecodeBuffer);
 };
 exports.runBytecodeFile = runBytecodeFile;
-module_1.default._extensions[COMPILED_EXTNAME] = function (fileModule, filename) {
-    var bytecodeBuffer = fs_1.default.readFileSync(filename);
+module_1.default._extensions[COMPILED_EXTNAME] = function (module, filename) {
+    const bytecodeBuffer = fs_1.default.readFileSync(filename);
     fixBytecode(bytecodeBuffer);
-    var length = readSourceHash(bytecodeBuffer);
-    var dummyCode = '';
+    const length = readSourceHash(bytecodeBuffer);
+    let dummyCode = '';
     if (length > 1) {
         dummyCode = '"' + '\u200b'.repeat(length - 2) + '"';
     }
-    var script = new vm_1.default.Script(dummyCode, {
+    const script = new vm_1.default.Script(dummyCode, {
         filename: filename,
         lineOffset: 0,
         displayErrors: true,
@@ -279,28 +295,28 @@ module_1.default._extensions[COMPILED_EXTNAME] = function (fileModule, filename)
         throw new Error('Invalid or incompatible cached data (cachedDataRejected)');
     }
     function require(id) {
-        return fileModule.require(id);
+        return module.require(id);
     }
     require.resolve = function (request, options) {
-        return module_1.default._resolveFilename(request, fileModule, false, options);
+        return module_1.default._resolveFilename(request, module, false, options);
     };
     if (process.mainModule) {
         require.main = process.mainModule;
     }
     require.extensions = module_1.default._extensions;
     require.cache = module_1.default._cache;
-    var compiledWrapper = script.runInThisContext({
+    const compiledWrapper = script.runInThisContext({
         filename: filename,
         lineOffset: 0,
         columnOffset: 0,
         displayErrors: true
     });
-    var dirname = path_1.default.dirname(filename);
-    var args = [fileModule.exports, require, fileModule, filename, dirname, process, global];
-    return compiledWrapper.apply(fileModule.exports, args);
+    const dirname = path_1.default.dirname(filename);
+    const args = [module.exports, require, module, filename, dirname, process, global];
+    return compiledWrapper.apply(module.exports, args);
 };
 function addLoaderFile(fileToLoad, loaderFilename) {
-    var loaderFilePath;
+    let loaderFilePath;
     if (typeof loaderFilename === 'boolean' || loaderFilename === undefined || loaderFilename === '') {
         loaderFilePath = fileToLoad.replace('.jsc', '.loader.js');
     }
@@ -308,22 +324,26 @@ function addLoaderFile(fileToLoad, loaderFilename) {
         loaderFilename = loaderFilename.replace('%', path_1.default.parse(fileToLoad).name);
         loaderFilePath = path_1.default.join(path_1.default.dirname(fileToLoad), loaderFilename);
     }
-    var relativePath = path_1.default.relative(path_1.default.dirname(loaderFilePath), fileToLoad);
-    var code = loaderCode('./' + relativePath);
+    const relativePath = path_1.default.relative(path_1.default.dirname(loaderFilePath), fileToLoad);
+    const code = loaderCode(relativePath);
     fs_1.default.writeFileSync(loaderFilePath, code);
 }
 exports.addLoaderFile = addLoaderFile;
-function loaderCode(targetPath) {
-    return "\n    require('bytenode');\n    require('" + targetPath + "');\n  ";
+function loaderCode(relativePath) {
+    return `
+    const bytenode = require('bytenode');
+    require('./${relativePath}');
+  `;
 }
 exports.loaderCode = loaderCode;
+;
 global.bytenode = {
     compileCode: exports.compileCode,
     compileFile: exports.compileFile,
     compileElectronCode: exports.compileElectronCode,
     runBytecode: exports.runBytecode,
     runBytecodeFile: exports.runBytecodeFile,
-    addLoaderFile: addLoaderFile,
-    loaderCode: loaderCode
+    addLoaderFile,
+    loaderCode
 };
 //# sourceMappingURL=index.js.map
