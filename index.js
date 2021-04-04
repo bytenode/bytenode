@@ -247,7 +247,7 @@ const runBytecodeFile = function (filename) {
   return runBytecode(bytecodeBuffer);
 };
 
-Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
+Module._extensions[COMPILED_EXTNAME] = function (fileModule, filename) {
 
   let bytecodeBuffer = fs.readFileSync(filename);
 
@@ -278,10 +278,10 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
   */
 
   function require(id) {
-    return module.require(id);
+    return fileModule.require(id);
   }
   require.resolve = function (request, options) {
-    return Module._resolveFilename(request, module, false, options);
+    return Module._resolveFilename(request, fileModule, false, options);
   };
   require.main = process.mainModule;
 
@@ -297,9 +297,9 @@ Module._extensions[COMPILED_EXTNAME] = function (module, filename) {
 
   let dirname = path.dirname(filename);
 
-  let args = [module.exports, require, module, filename, dirname, process, global];
+  let args = [fileModule.exports, require, fileModule, filename, dirname, process, global];
 
-  return compiledWrapper.apply(module.exports, args);
+  return compiledWrapper.apply(fileModule.exports, args);
 };
 
 /**
