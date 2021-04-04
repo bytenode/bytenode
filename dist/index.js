@@ -1,4 +1,5 @@
 "use strict";
+<<<<<<< HEAD
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loaderCode = exports.addLoaderFile = exports.runBytecodeFile = exports.compileFile = exports.runBytecode = exports.compileElectronCode = exports.compileCode = void 0;
 const tslib_1 = require("tslib");
@@ -8,6 +9,19 @@ const v8_1 = tslib_1.__importDefault(require("v8"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const child_process_1 = require("child_process");
 const module_1 = tslib_1.__importDefault(require("module"));
+=======
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.loaderCode = exports.addLoaderFile = exports.runBytecodeFile = exports.compileFile = exports.runBytecode = exports.compileElectronCode = exports.compileCode = void 0;
+const fs_1 = __importDefault(require("fs"));
+const vm_1 = __importDefault(require("vm"));
+const v8_1 = __importDefault(require("v8"));
+const path_1 = __importDefault(require("path"));
+const child_process_1 = require("child_process");
+const module_1 = __importDefault(require("module"));
+>>>>>>> c8aefc4 (Renaming “build” dir to “dist”)
 v8_1.default.setFlagsFromString('--no-lazy');
 if (Number.parseInt(process.versions.node.split('.')[0], 10) >= 12) {
     v8_1.default.setFlagsFromString('--no-flush-bytecode');
@@ -28,6 +42,10 @@ const compileCode = function (javascriptCode) {
 exports.compileCode = compileCode;
 const compileElectronCode = function (javascriptCode) {
     return new Promise((resolve, reject) => {
+<<<<<<< HEAD
+=======
+        var _a, _b, _c, _d, _e, _f, _g;
+>>>>>>> c8aefc4 (Renaming “build” dir to “dist”)
         let data = Buffer.from([]);
         const electronPath = path_1.default.join('node_modules', 'electron', 'cli.js');
         if (!fs_1.default.existsSync(electronPath)) {
@@ -38,6 +56,7 @@ const compileElectronCode = function (javascriptCode) {
             env: { ELECTRON_RUN_AS_NODE: '1' },
             stdio: ['pipe', 'pipe', 'pipe', 'ipc']
         });
+<<<<<<< HEAD
         if (proc.stdin) {
             proc.stdin.write(javascriptCode);
             proc.stdin.end();
@@ -61,6 +80,25 @@ const compileElectronCode = function (javascriptCode) {
                 console.error('Error: ', err);
             });
         }
+=======
+        (_a = proc.stdin) === null || _a === void 0 ? void 0 : _a.write(javascriptCode);
+        (_b = proc.stdin) === null || _b === void 0 ? void 0 : _b.end();
+        (_c = proc.stdout) === null || _c === void 0 ? void 0 : _c.on('data', (chunk) => {
+            data = Buffer.concat([data, chunk]);
+        });
+        (_d = proc.stdout) === null || _d === void 0 ? void 0 : _d.on('error', (err) => {
+            console.error(err);
+        });
+        (_e = proc.stdout) === null || _e === void 0 ? void 0 : _e.on('end', () => {
+            resolve(data);
+        });
+        (_f = proc.stderr) === null || _f === void 0 ? void 0 : _f.on('data', (chunk) => {
+            console.error('Error: ', chunk);
+        });
+        (_g = proc.stderr) === null || _g === void 0 ? void 0 : _g.on('error', (err) => {
+            console.error('Error: ', err);
+        });
+>>>>>>> c8aefc4 (Renaming “build” dir to “dist”)
         proc.addListener('message', (message) => console.log(message));
         proc.addListener('error', err => console.error(err));
         proc.on('error', (err) => reject(err));
