@@ -151,19 +151,19 @@ describe('Bytenode', () => {
 
 /**
  * Remove directory recursively
- * @param {string} dir_path
+ * @param {string} dirPath
  * @see https://stackoverflow.com/a/42505874/14350317
  */
-function rimraf(dir_path) {
-  if (fs.existsSync(dir_path)) {
-    fs.readdirSync(dir_path).forEach(function(entry) {
-      var entry_path = path.join(dir_path, entry);
-      if (fs.lstatSync(entry_path).isDirectory()) {
-        rimraf(entry_path);
+function rimraf (dirPath: string) {
+  if (fs.existsSync(dirPath)) {
+    fs.readdirSync(dirPath).forEach(function (entry) {
+      const entryPath = path.join(dirPath, entry)
+      if (fs.lstatSync(entryPath).isDirectory()) {
+        rimraf(entryPath)
       } else {
-        fs.unlinkSync(entry_path);
+        fs.unlinkSync(entryPath)
       }
-  });
-    fs.rmdirSync(dir_path);
+    })
+    fs.rmdirSync(dirPath)
   }
 }

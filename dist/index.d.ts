@@ -13,5 +13,5 @@ interface BytenodeOptions {
 export declare const compileFile: (args: BytenodeOptions | string, output?: string | undefined) => Promise<string>;
 export declare const runBytecodeFile: (filename: string) => any;
 export declare function addLoaderFile(fileToLoad: string, loaderFilename?: string): void;
-export declare function loaderCode(relativePath: string): string;
+export declare function loaderCode(targetPath: string): string;
 export {};

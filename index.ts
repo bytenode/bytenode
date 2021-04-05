@@ -255,7 +255,7 @@ export const runBytecodeFile = function (filename: string) {
 }
 
 // @ts-ignore
-Module._extensions[COMPILED_EXTNAME] = function (module: Module, filename: string) {
+Module._extensions[COMPILED_EXTNAME] = function (fileModule: Module, filename: string) {
   const bytecodeBuffer = fs.readFileSync(filename)
 
   fixBytecode(bytecodeBuffer)
@@ -285,11 +285,11 @@ Module._extensions[COMPILED_EXTNAME] = function (module: Module, filename: strin
   */
 
   function require (id: string) {
-    return module.require(id)
+    return fileModule.require(id)
   }
   require.resolve = function (request: any, options: any) {
     // @ts-ignore
-    return Module._resolveFilename(request, module, false, options)
+    return Module._resolveFilename(request, fileModule, false, options)
   }
   if (process.mainModule) {
     require.main = process.mainModule
@@ -309,9 +309,9 @@ Module._extensions[COMPILED_EXTNAME] = function (module: Module, filename: strin
 
   const dirname = path.dirname(filename)
 
-  const args = [module.exports, require, module, filename, dirname, process, global]
+  const args = [fileModule.exports, require, fileModule, filename, dirname, process, global]
 
-  return compiledWrapper.apply(module.exports, args)
+  return compiledWrapper.apply(fileModule.exports, args)
 }
 
 /**
@@ -328,15 +328,15 @@ export function addLoaderFile (fileToLoad: string, loaderFilename?: string) {
     loaderFilePath = path.join(path.dirname(fileToLoad), loaderFilename)
   }
   const relativePath = path.relative(path.dirname(loaderFilePath), fileToLoad)
-  const code = loaderCode(relativePath)
+  const code = loaderCode('./' + relativePath)
   fs.writeFileSync(loaderFilePath, code)
 }
 
-export function loaderCode (relativePath: string) {
+export function loaderCode (targetPath: string) {
   return `
     require('bytenode');
     require('${targetPath}');
-  `;
+  `
 }
 
 // @ts-ignore
@@ -349,5 +349,3 @@ global.bytenode = {
   addLoaderFile,
   loaderCode
 }
-
-// module.exports = global.bytenode
