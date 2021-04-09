@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OsamaAbbas/bytenode.git"
+    "url": "git+https://github.com/bytenode/bytenode.git"
   },
   "keywords": [
     "bytenode",
@@ -21,9 +21,9 @@
   "author": "Osama Abbas <pw.osama@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/OsamaAbbas/bytenode/issues"
+    "url": "https://github.com/bytenode/bytenode/issues"
   },
-  "homepage": "https://github.com/OsamaAbbas/bytenode#readme",
+  "homepage": "https://github.com/bytenode/bytenode#readme",
   "devDependencies": {
     "electron": "^12.0.1",
     "mocha": "^8.3.2"
