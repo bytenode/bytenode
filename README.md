@@ -2,7 +2,7 @@
 
 A minimalist bytecode compiler for Node.js.
 
-This tool truly compiles your JavaScript code into `V8` bytecode, so that you can protect your source code. It can be used with Node.js >= 5.7.x, as well as Electron and NW.js (check `examples/` directory).
+This tool truly compiles your JavaScript code into `V8` bytecode, so that you can protect your source code. It can be used with Node.js, as well as Electron and NW.js (check `examples/` directory).
 
 ---
 
@@ -24,11 +24,11 @@ sudo npm install -g bytenode
 
 * In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/OsamaAbbas/bytenode/issues/29).
 
-* Any code depends on `Function.prototype.toString` function will break, because Bytenode remove the source code from `.jsc` files and put a dummy code instead. See [#34](https://github.com/OsamaAbbas/bytenode/issues/34).
+* Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/OsamaAbbas/bytenode/issues/34).
 
 * In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/OsamaAbbas/bytenode/issues/41).
 
-* Async arrow functions cause crash in Electron apps if used in render processes. See [#47](https://github.com/OsamaAbbas/bytenode/issues/47).
+* Async arrow functions cause crash in Puppeteer and in Electron apps if used in render processes. See [#106](https://github.com/bytenode/bytenode/issues/106) [#47](https://github.com/OsamaAbbas/bytenode/issues/47). Use the usual async functions instead.
 
 ---
 
@@ -94,9 +94,6 @@ $ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
 ---
 
 ## Bytenode API
-
-You have to run node with this flag `node --no-lazy` in order to compile all functions in your code eagerly.
-Or, if you have no control on how your code will be run, you can use `v8.setFlagsFromString('--no-lazy')` function as well.
 
 ```javascript
 const bytenode = require('bytenode');
