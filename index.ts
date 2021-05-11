@@ -108,7 +108,8 @@ const fixBytecode = function (bytecodeBuffer: Buffer) {
   } else if (process.version.startsWith('v12') ||
     process.version.startsWith('v13') ||
     process.version.startsWith('v14') ||
-    process.version.startsWith('v15')) {
+    process.version.startsWith('v15') ||
+    process.version.startsWith('v16')) {
     dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12)
   } else {
     dummyBytecode.slice(12, 16).copy(bytecodeBuffer, 12)
