@@ -1,15 +1,17 @@
-const assert = require('assert')
-const { fork } = require('child_process')
-const fs = require('fs')
-const path = require('path')
-const bytenode = require('../index')
+import assert from 'assert'
+import { fork } from 'child_process'
+import fs from 'fs'
+import path from 'path'
+import { describe, it, before, after } from 'mocha'
+
+import * as bytenode from '../dist'
 
 const TEMP_DIR = 'temp'
 const TEST_FILE = 'testfile.js'
 const TEST_CODE = "console.log('      Greetings from Bytenode!');"
 
 describe('Bytenode', () => {
-  let bytecode
+  let bytecode: Buffer
   describe('compileCode()', () => {
     it('compiles without error', () => {
       assert.doesNotThrow(() => {
@@ -23,10 +25,11 @@ describe('Bytenode', () => {
 
   describe('compileElectronCode()', () => {
     it('compiles code', async () => {
-      let eBytecode
+      let eBytecode: Buffer
       await assert.doesNotReject(async () => {
         eBytecode = await bytenode.compileElectronCode(TEST_CODE)
       }, 'Rejection Error Compiling For Electron')
+      // @ts-ignore
       assert.notStrictEqual(eBytecode.length, 0, 'Zero Length Buffer')
     })
   })
@@ -53,7 +56,7 @@ describe('Bytenode', () => {
     const loaderFile = path.join(tempPath, TEST_FILE)
 
     it('creates non-zero length binary and loader files', async () => {
-      await assert.doesNotReject(() => {
+      await assert.doesNotReject((): Promise<void> => {
         return new Promise((resolve, reject) => {
           try {
             bytenode.compileFile({
@@ -101,7 +104,7 @@ describe('Bytenode', () => {
     const loaderFile = path.join(tempPath, TEST_FILE)
 
     it('creates non-zero length binary and loader files', async () => {
-      await assert.doesNotReject(() => {
+      await assert.doesNotReject((): Promise<void> => {
         return new Promise((resolve, reject) => {
           try {
             bytenode.compileFile({
@@ -124,10 +127,10 @@ describe('Bytenode', () => {
     })
 
     it('runs the .jsc file via Electron', async () => {
-      await assert.doesNotReject(() => {
+      await assert.doesNotReject((): Promise<void> => {
         return new Promise((resolve, reject) => {
           const electronPath = path.join('node_modules', 'electron', 'cli.js')
-          const bytenodePath = path.resolve(__dirname, '../cli.js')
+          const bytenodePath = path.resolve(__dirname, '../dist/cli.js')
           const proc = fork(electronPath, [bytenodePath, outputFile], {
             env: { ELECTRON_RUN_AS_NODE: '1' }
           })
@@ -148,19 +151,19 @@ describe('Bytenode', () => {
 
 /**
  * Remove directory recursively
- * @param {string} dir_path
+ * @param {string} dirPath
  * @see https://stackoverflow.com/a/42505874/14350317
  */
-function rimraf(dir_path) {
-  if (fs.existsSync(dir_path)) {
-    fs.readdirSync(dir_path).forEach(function(entry) {
-      var entry_path = path.join(dir_path, entry);
-      if (fs.lstatSync(entry_path).isDirectory()) {
-        rimraf(entry_path);
+function rimraf (dirPath: string) {
+  if (fs.existsSync(dirPath)) {
+    fs.readdirSync(dirPath).forEach(function (entry) {
+      const entryPath = path.join(dirPath, entry)
+      if (fs.lstatSync(entryPath).isDirectory()) {
+        rimraf(entryPath)
       } else {
-        fs.unlinkSync(entry_path);
+        fs.unlinkSync(entryPath)
       }
-  });
-    fs.rmdirSync(dir_path);
+    })
+    fs.rmdirSync(dirPath)
   }
 }

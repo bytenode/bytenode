@@ -1,116 +1,109 @@
 #!/usr/bin/env node
 
-const v8 = require('v8');
-const fs = require('fs');
-const path = require('path');
-const wrap = require('module').wrap;
-const spawnSync = require('child_process').spawnSync;
+// import v8 from 'v8'
+import fs from 'fs'
+import path from 'path'
+import { wrap } from 'module'
+import { spawnSync } from 'child_process'
 
-const bytenode = require('./index.js');
+import * as bytenode from './index'
 
-let args = process.argv.slice(2);
+const args = process.argv.slice(2)
 
 if (args.includes('-c')) {
-  args[args.indexOf('-c')] = '--compile';
+  args[args.indexOf('-c')] = '--compile'
 }
+
 if (args.includes('-o')) {
-  args[args.indexOf('-o')] = '--out';
+  args[args.indexOf('-o')] = '--out'
 }
 
 if (args.includes('-h')) {
-  args[args.indexOf('-h')] = '--help';
+  args[args.indexOf('-h')] = '--help'
 }
 
 if (args.includes('-v')) {
-  args[args.indexOf('-v')] = '--version';
+  args[args.indexOf('-v')] = '--version'
 }
 
 if (args.includes('-n')) {
-  args[args.indexOf('-n')] = '--no-module';
+  args[args.indexOf('-n')] = '--no-module'
 }
 
 if (args.includes('-e')) {
-  args[args.indexOf('-e')] = '--electron';
+  args[args.indexOf('-e')] = '--electron'
 }
 
 if (args.includes('-l')) {
-  args[args.indexOf('-l')] = '--loader';
+  args[args.indexOf('-l')] = '--loader'
 }
 
-let loaderFilename = false;
-let createLoaderFile = false;
+let loaderFilename: string
+let createLoader = false
 
 if (args.includes('--loader')) {
-  createLoaderFile = true;
-  const nextIndex = args.indexOf('--loader') + 1;
-  const nextItem = args[nextIndex];
+  createLoader = true
+  const nextIndex = args.indexOf('--loader') + 1
+  const nextItem = args[nextIndex]
   if (nextItem && nextItem[0] !== '-') {
-    loaderFilename = nextItem;
+    loaderFilename = nextItem
     // remove the loader filename from the args so it
     // isn't mistaken for a file to compile
-    args.splice(nextIndex, 1);
+    args.splice(nextIndex, 1)
   }
 }
-  
+
 const program = {
   dirname: __dirname,
   filename: __filename,
   nodeBin: process.argv[0],
   flags: args.filter(arg => arg[0] === '-'),
-  files: args.filter(arg => arg[0] !== '-' && arg[1] !== '-'),
-};
-
-if (program.flags.includes('--compile')) {
-
-  program.files.forEach(async function (filename) {
-
-    filename = path.resolve(filename);
-
-    if (fs.existsSync(filename) && fs.statSync(filename).isFile()) {
-
-      let compileAsModule = !program.flags.includes('--no-module');
-      let electron = program.flags.includes('--electron')
-
-      try {
-        await bytenode.compileFile({ filename, compileAsModule, electron, createLoaderFile, loaderFilename });
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      console.error(`Error: Cannot find file '${filename}'.`);
-    }
-  });
-
-  if (program.files.length === 0) {
-
-    let script = '';
-
-    process.stdin.setEncoding('utf-8');
-
-    process.stdin.on('readable', () => {
-      let data = process.stdin.read();
-      if (data !== null) {
-        script += data;
-      }
-    });
-
-    process.stdin.on('end', () => {
-
-      try {
-        if (program.flags.includes('--no-module')) {
-          process.stdout.write(bytenode.compileCode(script));
-        } else {
-          process.stdout.write(bytenode.compileCode(wrap(script)));
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    });
-  }
+  files: args.filter(arg => arg[0] !== '-' && arg[1] !== '-')
 }
 
-else if (program.flags.includes('--help')) {
+if (program.flags.includes('--compile')) {
+  program.files.forEach(async function (filename) {
+    filename = path.resolve(filename)
 
+    if (fs.existsSync(filename) && fs.statSync(filename).isFile()) {
+      const compileAsModule = !program.flags.includes('--no-module')
+      const electron = program.flags.includes('--electron')
+
+      try {
+        await bytenode.compileFile({ filename, compileAsModule, electron, createLoader, loaderFilename })
+      } catch (error) {
+        console.error(error)
+      }
+    } else {
+      console.error(`Error: Cannot find file '${filename}'.`)
+    }
+  })
+
+  if (program.files.length === 0) {
+    let script = ''
+
+    process.stdin.setEncoding('utf-8')
+
+    process.stdin.on('readable', () => {
+      const data = process.stdin.read()
+      if (data !== null) {
+        script += data
+      }
+    })
+
+    process.stdin.on('end', () => {
+      try {
+        if (program.flags.includes('--no-module')) {
+          process.stdout.write(bytenode.compileCode(script))
+        } else {
+          process.stdout.write(bytenode.compileCode(wrap(script)))
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    })
+  }
+} else if (program.flags.includes('--help')) {
   console.log(`
   Usage: bytenode [option] [ FILE... | - ] [arguments]
 
@@ -137,25 +130,19 @@ else if (program.flags.includes('--help')) {
 
   $ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
                                       compile from stdin and save to \`hello.jsc\`
-`);
-}
-
-else if (program.flags.includes('--version') && program.flags.length === 1 && program.files.length === 0) {
-
-  const package = require('./package.json');
-  console.log(package.name, package.version);
-}
-
-else {
-
+`)
+} else if (program.flags.includes('--version') && program.flags.length === 1 && program.files.length === 0) {
+  const pkg = require('./package.json')
+  console.log(pkg.name, pkg.version)
+} else {
   try {
     spawnSync(program.nodeBin, [
       '-r',
       path.resolve(__dirname, 'index.js')
     ].concat(args), {
-        stdio: 'inherit'
-      });
+      stdio: 'inherit'
+    })
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
