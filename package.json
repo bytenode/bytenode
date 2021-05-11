@@ -4,8 +4,13 @@
   "description": "A minimalist bytecode compiler for Node.js",
   "main": "dist/index.js",
   "bin": "dist/cli.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "pretest": "tsc",
     "test": "ts-mocha './{,!(node_modules)/**}/*.test.ts'"
   },
