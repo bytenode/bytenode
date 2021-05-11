@@ -2,10 +2,11 @@
   "name": "bytenode",
   "version": "1.2.3",
   "description": "A minimalist bytecode compiler for Node.js",
-  "main": "index.js",
-  "bin": "cli.js",
+  "main": "build/index.js",
+  "bin": "build/cli.js",
   "scripts": {
-    "test": "mocha"
+    "build": "tsc",
+    "test": "tsc; ts-mocha './{,!(node_modules)/**}/*.test.ts'"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,17 @@
   },
   "homepage": "https://github.com/bytenode/bytenode#readme",
   "devDependencies": {
+    "@types/mocha": "^8.2.2",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
     "electron": "^12.0.1",
-    "mocha": "^8.3.2"
+    "eslint": "^7.23.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "mocha": "^8.3.2",
+    "ts-mocha": "^8.0.0",
+    "typescript": "^4.2.3"
   }
 }
