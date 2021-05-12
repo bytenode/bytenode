@@ -137,7 +137,7 @@ if (program.flags.includes('--compile')) {
                                       compile from stdin and save to \`hello.jsc\`
 `)
 } else if (program.flags.includes('--version') && program.flags.length === 1 && program.files.length === 0) {
-  const pkg = require('./package.json')
+  const pkg = require('../package.json')
   console.log(pkg.name, pkg.version)
 } else {
   try {
