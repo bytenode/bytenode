@@ -197,7 +197,7 @@ export const compileFile = async function (args: BytenodeOptions | string, outpu
     filename = args.filename
     compileAsModule = args.compileAsModule !== false
     electron = args.electron
-    createLoader = true
+    createLoader = args.createLoader
     loaderFilename = args.loaderFilename
     if (loaderFilename) createLoader = true
   }
