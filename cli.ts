@@ -53,6 +53,10 @@ if (args.includes('--loader')) {
   }
 }
 
+if (args.includes('--no-loader')) {
+  createLoader = false
+}
+
 const program = {
   dirname: __dirname,
   filename: __filename,
@@ -115,6 +119,7 @@ if (program.flags.includes('--compile')) {
     -n, --no-module                   compile without producing commonjs module
     -e, --electron                    compile for Electron
 
+    --no-loader                       do not create a loader file, conflicts with -l
     -l, --loader [ FILE | PATTERN ]   create a loader file and optionally define
                                       loader filename or pattern using % as filename replacer
                                       defaults to %.loader.js
