@@ -33,16 +33,16 @@
   "homepage": "https://github.com/bytenode/bytenode#readme",
   "devDependencies": {
     "@types/mocha": "^8.2.2",
-    "@typescript-eslint/eslint-plugin": "^4.19.0",
-    "@typescript-eslint/parser": "^4.19.0",
-    "electron": "^12.0.1",
-    "eslint": "^7.23.0",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@typescript-eslint/parser": "^4.23.0",
+    "electron": "^12.0.7",
+    "eslint": "^7.26.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.3.1",
-    "mocha": "^8.3.2",
+    "eslint-plugin-promise": "^5.1.0",
+    "mocha": "^8.4.0",
     "ts-mocha": "^8.0.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.2.4"
   }
 }
