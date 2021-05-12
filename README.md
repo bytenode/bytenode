@@ -28,7 +28,7 @@ sudo npm install -g bytenode
 
 * In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/OsamaAbbas/bytenode/issues/41).
 
-* Async arrow functions cause crash in Puppeteer and in Electron apps if used in render processes. See [#106](https://github.com/bytenode/bytenode/issues/106) [#47](https://github.com/OsamaAbbas/bytenode/issues/47). Use the usual async functions instead.
+* Arrow functions (especially Async arrow functions) cause crash in Puppeteer and in Electron apps if used in render processes. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/OsamaAbbas/bytenode/issues/47). They also cause an issue with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). Use the usual async functions instead.
 
 ---
 
@@ -267,4 +267,4 @@ Please note `.jsc` files must run with the same Node.js version that was used to
 
 ## Acknowledgements
 
-I had the idea of this tool many years ago. However, I finally decided to implement it after seeing this [issue](https://github.com/nodejs/node/issues/11842) by @hashseed. Also, some parts was inspired by [v8-compile-cache](https://github.com/zertosh/v8-compile-cache) by @zertosh.
+I had the idea of this tool many years ago. However, I finally decided to implement it after seeing this [issue](https://github.com/nodejs/node/issues/11842) by @hashseed. Also, some parts were inspired by [v8-compile-cache](https://github.com/zertosh/v8-compile-cache) by @zertosh.
