@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [12.x, 14.x]
+        node-version: [14.x, 16.x]
         os: [ubuntu-latest]
 
     # run pre-flight tests on ubuntu, instead of full OS support matrix, to reduce costs
@@ -27,10 +27,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package.json') }}
           restore-keys: |
             npm-${{ runner.os }}-${{ matrix.node-version }}-
       - name: Install Packages
-        run: npm ci
+        run: npm install
       - name: Run Tests
         run: npm test
