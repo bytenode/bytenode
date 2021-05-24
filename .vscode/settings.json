@@ -4,5 +4,8 @@
   "editor.tabSize": 2,
   "files.insertFinalNewline": true,
   "javascript.format.insertSpaceAfterConstructor": true,
-  "javascript.format.insertSpaceBeforeFunctionParenthesis": true
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "editor.rulers": [
+    80
+  ]
 }
