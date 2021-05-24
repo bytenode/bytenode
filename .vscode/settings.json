@@ -7,5 +7,7 @@
   "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   "editor.rulers": [
     80
-  ]
+  ],
+  "standard.autoFixOnSave": true,
+  "standard.engine": "semistandard"
 }
