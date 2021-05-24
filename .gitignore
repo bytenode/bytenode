@@ -62,6 +62,3 @@ typings/
 
 # outputs of bytenode
 *.jsc
-
-# dist directory
-dist/
