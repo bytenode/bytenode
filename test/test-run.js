@@ -60,7 +60,7 @@ it('runs a compiled module and preserve its exports.', () => {
 });
 
 it('compiles and runs a complex, big javascript file', () => {
-  const filename = path.resolve(__dirname, './hapi-bundle.js');
+  const filename = path.resolve(__dirname, './hapi-bundle.min.js');
   const output = path.resolve(__dirname, './hapi-bundle.jsc');
   const javaScriptEntity = new Bytenode.JavaScriptEntity({
     filename,
