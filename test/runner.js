@@ -16,7 +16,7 @@ exports.it = function (description, fn) {
 };
 
 exports.section = testSection => exports.it('', () => {
-  console.log(`\n  ${testSection}`);
+  console.log(`\n${testSection}`);
 });
 
 const runTests = function () {
@@ -24,18 +24,18 @@ const runTests = function () {
     try {
       test.fn();
       if (test.description !== '') {
-        console.log(`✓ ${test.description}`);
+        console.log(`  ✓ ${test.description}`);
       }
       ++passedCount;
     } catch (error) {
-      console.log(`✕ ${test.description}`);
+      console.log(`  ✕ ${test.description}`);
       console.log(error);
       ++failedCount;
     }
   });
 
   if (failedCount !== 0) {
-    console.log(`${failedCount} of ${passedCount + failedCount} tests failed.`);
+    console.log(`\n${failedCount} of ${passedCount + failedCount} tests failed.`);
     process.exit(1);
   } else {
     console.log(`\nAll ${passedCount} tests completed successfully.`);
