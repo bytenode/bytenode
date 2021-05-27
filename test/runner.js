@@ -35,10 +35,10 @@ const runTests = function () {
   });
 
   if (failedCount !== 0) {
-    console.log(`\n${failedCount} of ${passedCount + failedCount} tests failed.`);
+    console.log(`\n${failedCount} of ${passedCount + failedCount} tests failed.\n`);
     process.exit(1);
   } else {
-    console.log(`\nAll ${passedCount} tests completed successfully.`);
+    console.log(`\nAll ${passedCount} tests completed successfully.\n`);
   }
 };
 

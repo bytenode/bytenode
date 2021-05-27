@@ -21,7 +21,8 @@ it('create an instance of BytecodeEntity with `bytecode` buffer.', () => {
     bytecode: javaScriptEntity.bytecode
   });
 
-  assert(bytecodeEntity.bytecode === javaScriptEntity.bytecode);
+  assert(Buffer.isBuffer(bytecodeEntity.bytecode));
+  assert.deepStrictEqual(bytecodeEntity.bytecode, javaScriptEntity.bytecode);
 });
 
 it('runs `bytecode` and returns its result.', () => {
