@@ -25,8 +25,8 @@ const runTests = function () {
       test.fn();
       if (test.description !== '') {
         console.log(`  ✓ ${test.description}`);
+        ++passedCount;
       }
-      ++passedCount;
     } catch (error) {
       console.log(`  ✕ ${test.description}`);
       console.log(error);
