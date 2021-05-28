@@ -44,6 +44,7 @@ it('create an instance of BytecodeEntity with `filename`.', () => {
 
   assert(Buffer.isBuffer(bytecodeEntity.bytecode));
   assert.deepStrictEqual(bytecodeEntity.bytecode, javaScriptEntity.bytecode);
+  fs.unlinkSync(output);
 });
 
 it('runs `bytecode` and returns its result.', () => {
