@@ -25,6 +25,27 @@ it('create an instance of BytecodeEntity with `bytecode` buffer.', () => {
   assert.deepStrictEqual(bytecodeEntity.bytecode, javaScriptEntity.bytecode);
 });
 
+it('create an instance of BytecodeEntity with `filename`.', () => {
+  const filename = path.resolve(__dirname, './sample.js');
+  const output = path.resolve(__dirname, './sample.jsc');
+
+  const javaScriptEntity = new Bytenode.JavaScriptEntity({
+    filename,
+    compileAsModule: false
+  });
+  javaScriptEntity.compile();
+  javaScriptEntity.save({ output });
+
+  const bytecodeEntity = new Bytenode.BytecodeEntity({
+    filename: output
+  });
+
+  bytecodeEntity._fixBytecode();
+
+  assert(Buffer.isBuffer(bytecodeEntity.bytecode));
+  assert.deepStrictEqual(bytecodeEntity.bytecode, javaScriptEntity.bytecode);
+});
+
 it('runs `bytecode` and returns its result.', () => {
   const code = '42;';
 
