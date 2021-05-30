@@ -15,7 +15,7 @@ it('compiles `code` to `bytecode`.', () => {
 });
 
 it('compiles `filename.js` to `filename.jsc`.', () => {
-  const filename = path.resolve(__dirname, './sample.js');
+  const filename = path.resolve(__dirname, './hapi-bundle.min.js');
   Bytenode.compile({ filename });
   assert(fs.existsSync(filename.replace('.js', '.jsc')));
   fs.unlinkSync(filename.replace('.js', '.jsc'));
