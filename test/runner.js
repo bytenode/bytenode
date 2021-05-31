@@ -28,8 +28,8 @@ const runTests = function () {
         ++passedCount;
       }
     } catch (error) {
-      console.log(`  ✕ ${test.description}`);
-      console.log(error);
+      console.log(`\n  ✕ ${test.description}`);
+      console.log(`    ${error}\n`);
       ++failedCount;
     }
   });
