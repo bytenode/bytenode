@@ -4,6 +4,7 @@
   "description": "A minimalist bytecode compiler for Node.js",
   "main": "lib/index.js",
   "bin": "lib/cli.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib"
   ],
