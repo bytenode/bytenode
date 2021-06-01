@@ -43,6 +43,42 @@ it('`bytenode --compile` compiles file.js to file.jsc.', () => {
   fs.unlinkSync(output);
 });
 
+it('`bytenode --loader` creates file.loader.js.', () => {
+  const code = 'module.exports = 42;';
+  const filename = path.resolve(__dirname, 'file.js');
+  const output = path.resolve(__dirname, 'file.jsc');
+  const loader = path.resolve(__dirname, 'file.loader.js');
+
+  fs.writeFileSync(filename, code);
+
+  execSync(`node ${cli} -c ${filename} --loader`, { encoding: 'utf-8' });
+
+  assert(fs.existsSync(output));
+  assert(fs.existsSync(loader));
+
+  fs.unlinkSync(filename);
+  fs.unlinkSync(output);
+  fs.unlinkSync(loader);
+});
+
+it('`bytenode --loader "load.%.js"` creates load.file.js.', () => {
+  const code = 'module.exports = 42;';
+  const filename = path.resolve(__dirname, 'file.js');
+  const output = path.resolve(__dirname, 'file.jsc');
+  const loader = path.resolve(__dirname, 'load.file.js');
+
+  fs.writeFileSync(filename, code);
+
+  execSync(`node ${cli} -c ${filename} -l load.%.js`, { encoding: 'utf-8' });
+
+  assert(fs.existsSync(output));
+  assert(fs.existsSync(loader));
+
+  fs.unlinkSync(filename);
+  fs.unlinkSync(output);
+  fs.unlinkSync(loader);
+});
+
 it('`bytenode --compile -` compiles code from stdin.', () => {
   const bytecode = execSync(`echo '42;' | node ${cli} --compile --no-module -`,
     { encoding: 'buffer' });
