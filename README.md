@@ -140,7 +140,7 @@ user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
 
 <a name="Bytenode.compile"></a>
 
-### Bytenode.compile({ code, filename, [compileAsModule], output }) ⇒ <code>string</code> \| <code>Buffer</code>
+### Bytenode.compile({ code, filename, compileAsModule, output }) ⇒ <code>string</code> \| <code>Buffer</code>
 Compiles JavaScript `code` or `filename`.
 
 **Returns**: <code>string</code> \| <code>Buffer</code> - The path to the compiled file. If `output` is set deliberatly to `null` or `undefined`, the bytecode buffer will be returned instead.  
@@ -149,13 +149,13 @@ Compiles JavaScript `code` or `filename`.
 | --- | --- | --- | --- |
 | code | <code>string</code> |  | The source code that will be compiled. |
 | filename | <code>string</code> |  | The JavaScript filename. This filename will be used in stack traces produced by this script. If `code` is not specified, `filename` will be compiled instead. |
-| [compileAsModule] | <code>boolean</code> | <code>true</code> | whether to compile `code` or `filename` as a CommonJs module. Defaults to true. |
+| compileAsModule | <code>boolean</code> | <code>true</code> | whether to compile `code` or `filename` as a CommonJs module. Defaults to true. |
 | output | <code>string</code> |  | The output filename. Defaults to the same path and name as `filename`, but with `.jsc` extension. |
 
 <a name="Bytenode.run"></a>
 
 ### Bytenode.run({ bytecode, filename }) ⇒ <code>any</code>
-Runs the compiled `bytecode` and returns its result. In most cases, you should use `require('script.jsc');` instead, as `Bytenode.run();` function will NOT return module.exports properly. Also, if it is called twice, it will run `bytecode` twice in the current context, which can lead to issues and might crash the application.
+Runs the compiled `bytecode` and returns its result. In most cases, you should use `require('script.jsc');` instead, as `Bytenode.run();` function will NOT return `module.exports` properly. Also, if it is called twice, it will run `bytecode` twice in the current context, which can lead to issues and might crash the application.
 
 **Returns**: <code>any</code> - The result of the very last statement executed in the original script.  
 
