@@ -41,3 +41,22 @@ used with an unsupported Node.js version. Future versions will be added in time
 of their release.
 
 ---
+
+## Known Issues and Limitations
+
+* In Node 10.x, Bytenode does not work in debug mode.
+See [#29](https://github.com/bytenode/bytenode/issues/29).
+
+* Any code depends on `Function.prototype.toString` function will break,
+because Bytenode removes the source code from `.jsc` files and puts a dummy
+code instead. See [#34](https://github.com/bytenode/bytenode/issues/34).
+
+* Arrow functions (especially Async arrow functions) cause crash in Puppeteer
+and in Electron apps if used in render processes. See
+[#106](https://github.com/bytenode/bytenode/issues/106),
+[#47](https://github.com/bytenode/bytenode/issues/47). They also cause an
+issue with the ndb debugger.
+See [#135](https://github.com/bytenode/bytenode/issues/135). Use the usual
+Async functions instead.
+
+---
