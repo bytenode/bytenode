@@ -126,3 +126,51 @@ user@machine:~$ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
 ```console
 user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
 ```
+
+---
+
+## Bytenode API:
+
+<a name="Bytenode"></a>
+
+* [Bytenode](#Bytenode) : <code>module</code>
+    * [.compile({ code, filename, compileAsModule, output })](#Bytenode.compile) ⇒ <code>string</code> \| <code>Buffer</code>
+    * [.run({ bytecode, filename })](#Bytenode.run) ⇒ <code>any</code>
+    * [.registerExtension(ext)](#Bytenode.registerExtension)
+
+<a name="Bytenode.compile"></a>
+
+### Bytenode.compile({ code, filename, [compileAsModule], output }) ⇒ <code>string</code> \| <code>Buffer</code>
+Compiles JavaScript `code` or `filename`.
+
+**Returns**: <code>string</code> \| <code>Buffer</code> - The path to the compiled file. If `output` is set deliberatly to `null` or `undefined`, the bytecode buffer will be returned instead.  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| code | <code>string</code> |  | The source code that will be compiled. |
+| filename | <code>string</code> |  | The JavaScript filename. This filename will be used in stack traces produced by this script. If `code` is not specified, `filename` will be compiled instead. |
+| [compileAsModule] | <code>boolean</code> | <code>true</code> | whether to compile `code` or `filename` as a CommonJs module. Defaults to true. |
+| output | <code>string</code> |  | The output filename. Defaults to the same path and name as `filename`, but with `.jsc` extension. |
+
+<a name="Bytenode.run"></a>
+
+### Bytenode.run({ bytecode, filename }) ⇒ <code>any</code>
+Runs the compiled `bytecode` and returns its result. In most cases, you should use `require('script.jsc');` instead, as `Bytenode.run();` function will NOT return module.exports properly. Also, if it is called twice, it will run `bytecode` twice in the current context, which can lead to issues and might crash the application.
+
+**Returns**: <code>any</code> - The result of the very last statement executed in the original script.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| bytecode | <code>Buffer</code> | The bytecode buffer which wll be run. |
+| filename | <code>string</code> | The path to the bytecode file. |
+
+<a name="Bytenode.registerExtension"></a>
+
+### Bytenode.registerExtension(ext)
+Registers the extension `ext` in Node.js module system, so that they can be required using `require()` function. 
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ext | <code>string</code> | A valid extension with a preceding dot (e.g. `.jsc` or `.bin`). |
+
+---
