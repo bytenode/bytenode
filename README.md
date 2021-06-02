@@ -2,9 +2,7 @@
 
 A minimalist bytecode compiler for Node.js.
 
-This tool compiles your JavaScript code into `V8` bytecode, so that you can
-protect your source code. It can be used with Node.js, as well as Electron and
-NW.js.
+This tool compiles your JavaScript code into `V8` bytecode, so that you can protect your source code. It can be used with Node.js, as well as Electron and NW.js.
 
 ---
 
@@ -13,7 +11,7 @@ NW.js.
 Locally:
 
 ```console
-npm install --save bytenode
+user@machine:~$ npm install --save bytenode
 ```
 ```JavaScript
 const Bytenode = require('bytenode');
@@ -22,7 +20,7 @@ const Bytenode = require('bytenode');
 Or globally:
 
 ```console
-sudo npm install -g bytenode
+user@machine:~$ sudo npm install -g bytenode
 ```
 
 ---
@@ -31,20 +29,19 @@ sudo npm install -g bytenode
 
 * Functions `.compileCode()` and `.compileFile()` were removed. Use `Bytenode.compile()` function instead. See Bytenode API below for  more details.
 
-* Function `.compileElectronCode()` was removed as well. If you want to compile for electron, pass its executable to Bytenode cli (using `--use` flag). See Bytenode CLI below for more details.
+* Function `.compileElectronCode()` was removed as well. If you want to compile for Electron, pass its executable to Bytenode CLI (using `--use` flag). See Bytenode CLI below for more details.
 
 * Functions `.runBytecode()` and `.runBytecodeFile()` were removed. Use `Bytenode.run()` function instead. See Bytenode API below for  more details.
 
 * Bytenode supports Node.js from v8.8 to v16, and it will throw an error when used with an unsupported Node.js version. Future versions will be added in time of their release.
 
-* The global `bytenode` variable was removed. Bytenode must be explicitly required.
+* The global `bytenode` variable was removed. Bytenode must be explicitly required and assigned to a variable.
 
 ---
 
 ## Known Issues and Limitations:
 
-* In Node 10.x, Bytenode does not work in debug mode.
-See [#29](https://github.com/bytenode/bytenode/issues/29).
+* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/bytenode/bytenode/issues/29).
 
 * Any code that depends on `Function.prototype.toString()` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/bytenode/bytenode/issues/34).
 
@@ -92,7 +89,7 @@ See [#29](https://github.com/bytenode/bytenode/issues/29).
                                       use NW.js executable to compile `main.js`.
 ```
 
-### Examples:
+### CLI Examples:
 
 * Compile all `.js` files in `./app` directory.
 
@@ -100,14 +97,11 @@ See [#29](https://github.com/bytenode/bytenode/issues/29).
 user@machine:~$ bytenode --compile ./app/*.js
 ```
 
-* Compile all `.js` files in your project.
+* Compile all `.js` files in your project. You may need to enable `globstar` option in bash (you should add it to `~/.bashrc`): `shopt -s globstar`.
 
 ```console
 user@machine:~$ bytenode --compile ./**/*.js
 ```
-
-Note: you may need to enable `globstar` option in bash (you should add it to `~/.bashrc`):
-`shopt -s globstar`.
 
 * Compile from `stdin` and save to `hello.jsc` file.
 
@@ -115,7 +109,13 @@ Note: you may need to enable `globstar` option in bash (you should add it to `~/
 user@machine:~$ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
 ```
 
-* Use NW.js executable to compile `main.js`. (`nw` should be installed first, `npm install nw`).
+* Use Electron executable to compile `main.js`. (`electron` must be installed first, `npm install electron`).
+
+```console
+user@machine:~$ bytenode -c main.js --use ./node_modules/electron/dist/electron
+```
+
+* Use NW.js executable to compile `main.js`. (`nw` must be installed first, `npm install nw`).
 
 ```console
 user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
@@ -127,7 +127,7 @@ user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
 
 ## Bytenode API:
 
-* [Bytenode](#BytenodeAPI) : <code>Module</code>
+* [Bytenode](#BytenodeAPI):
     * [.compile({ code, filename, compileAsModule, output })](#Bytenode.compile) ⇒ <code>string</code> \| <code>Buffer</code>
     * [.run({ bytecode, filename })](#Bytenode.run) ⇒ <code>any</code>
     * [.registerExtension(ext)](#Bytenode.registerExtension)
@@ -140,12 +140,12 @@ Compiles JavaScript `code` or `filename`.
 
 **Returns**: <code>string</code> \| <code>Buffer</code> - The path to the compiled file. If `output` is set deliberatly to `null` or `undefined`, the bytecode buffer will be returned instead.  
 
-| Param           | Type                 | Default           | Description                                                                                                                                                   |
-| ---             | ---                  | ---               | ---                                                                                                                                                           |
-| code            | <code>string</code>  |                   | The source code that will be compiled.                                                                                                                        |
-| filename        | <code>string</code>  |                   | The JavaScript filename. This filename will be used in stack traces produced by this script. If `code` is not specified, `filename` will be compiled instead. |
-| compileAsModule | <code>boolean</code> | <code>true</code> | whether to compile `code` or `filename` as a CommonJs module. Defaults to true.                                                                               |
-| output          | <code>string</code>  |                   | The output filename. Defaults to the same path and name as `filename`, but with `.jsc` extension.                                                             |
+| Param           | Type                 | Description                                                                                                                                                   |
+| ---             | ---                  | ---                                                                                                                                                           |
+| code            | <code>string</code>  | The source code that will be compiled.                                                                                                                        |
+| filename        | <code>string</code>  | The JavaScript filename. This filename will be used in stack traces produced by this script. If `code` is not specified, `filename` will be compiled instead. |
+| compileAsModule | <code>boolean</code> | whether to compile `code` or `filename` as a CommonJs module.<br>Defaults to `true`.                                                                               |
+| output          | <code>string</code>  | The output filename.<br>Defaults to the same path and name as `filename`, but with `.jsc` extension.                                                             |
 
 <a name="Bytenode.run"></a>
 
@@ -153,7 +153,7 @@ Compiles JavaScript `code` or `filename`.
 
 Runs the compiled `bytecode` and returns its result.
 
-In most cases, you should use `require('./script.jsc');` instead, as `Bytenode.run();` function will NOT preserve `module.exports` (in case of `compileAsModule: true`). In case of `compileAsModule: false`, it runs `bytecode` in the current context, so any free variables will become global variables. If it is called twice, it will run `bytecode` twice too, which can lead to issues and might crash the application.
+In most cases, you should use `require('./script.jsc')` instead, as `Bytenode.run()` function will NOT return `module.exports` (in case of `compileAsModule: true`). In case of `compileAsModule: false`, it runs `bytecode` in the current context, so any free variables will become global variables. If it is called twice, it will run `bytecode` twice too, which can lead to issues and might crash the application.
 
 **Returns**: <code>any</code> - The result of the very last statement executed in the original script.  
 
