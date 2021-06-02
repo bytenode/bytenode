@@ -8,7 +8,7 @@ NW.js.
 
 ---
 
-## Install
+## Install:
 
 ```console
 npm install --save bytenode
@@ -22,7 +22,7 @@ sudo npm install -g bytenode
 
 ---
 
-Breaking Changes in Bytenode v2:
+## Breaking Changes in Bytenode v2:
 
 * Functions `.compileCode()` and `.compileFile()` were removed. Use
 `Bytenode.compile()` function instead. See Bytenode API below for  more
@@ -40,14 +40,17 @@ details.
 used with an unsupported Node.js version. Future versions will be added in time
 of their release.
 
+* The global `bytenode` variable was removed. Bytenode must be explicitly
+required `const Bytenode = require('bytenode');`.
+
 ---
 
-## Known Issues and Limitations
+## Known Issues and Limitations:
 
 * In Node 10.x, Bytenode does not work in debug mode.
 See [#29](https://github.com/bytenode/bytenode/issues/29).
 
-* Any code depends on `Function.prototype.toString` function will break,
+* Any code depends on `Function.prototype.toString()` function will break,
 because Bytenode removes the source code from `.jsc` files and puts a dummy
 code instead. See [#34](https://github.com/bytenode/bytenode/issues/34).
 
@@ -60,3 +63,66 @@ See [#135](https://github.com/bytenode/bytenode/issues/135). Use the usual
 Async functions instead.
 
 ---
+
+## Bytenode CLI:
+
+```
+  Usage: bytenode [option] [ FILE... | - ] [arguments]
+
+  Options:
+    -h, --help                        show help information.
+    -v, --version                     show Bytenode version.
+
+        --use     [ EXECUTABLE ]      use this executable instead of the default Node.js.
+                                      Electron and NW.js executables can be used.
+
+    -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files.
+    -n, --no-module                   compile without producing commonjs module.
+
+    -l, --loader  [ FILE | PATTERN ]  create a loader file and optionally define
+                                      loader filename or pattern using % as filename replacer.
+                                      defaults to %.loader.js
+
+  Examples:
+
+  $ bytenode -c script.js             compile `script.js` to `script.jsc`.
+  $ bytenode -c src/*.js              compile all `.js` files in `src/` directory.
+
+  $ bytenode -c ./*.js -l %.load.js   create `filename.load.js` loader files along side `.jsc` files
+
+  $ bytenode script.jsc [arguments]   run `script.jsc` with arguments.
+  $ bytenode                          open Node REPL where `.jsc` files can be required directly.
+
+  $ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
+                                      compile from stdin and save to `hello.jsc`.
+
+  $ bytenode -c main.js --use ./node_modules/electron/dist/electron
+                                      use Electron executable to compile `main.js`.
+
+  $ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
+                                      use NW.js executable to compile `main.js`.
+```
+
+### Examples:
+
+* Compile all `.js` files in `./app` directory.
+```console
+user@machine:~$ bytenode --compile ./app/*.js
+```
+
+* Compile all `.js` files in your project.
+```console
+user@machine:~$ bytenode --compile ./**/*.js
+```
+Note: you may need to enable `globstar` option in bash (you should add it to `~/.bashrc`):
+`shopt -s globstar`.
+
+* Compile from `stdin` and save to `hello.jsc` file.
+```console
+user@machine:~$ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
+```
+
+* Use NW.js executable to compile `main.js`. (`nw` should be installed first, `npm install nw`).
+```console
+user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
+```
