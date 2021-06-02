@@ -129,11 +129,11 @@ user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
 
 ---
 
+<a name="BytenodeAPI"></a>
+
 ## Bytenode API:
 
-<a name="Bytenode"></a>
-
-* [Bytenode](#Bytenode) : <code>module</code>
+* [Bytenode](#BytenodeAPI) : <code>module</code>
     * [.compile({ code, filename, compileAsModule, output })](#Bytenode.compile) ⇒ <code>string</code> \| <code>Buffer</code>
     * [.run({ bytecode, filename })](#Bytenode.run) ⇒ <code>any</code>
     * [.registerExtension(ext)](#Bytenode.registerExtension)
