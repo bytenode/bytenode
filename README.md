@@ -159,7 +159,7 @@ In most cases, you should use `require('./script.jsc')` instead, as `Bytenode.ru
 
 | Param    | Type                | Description                           |
 | ---      | ---                 | ---                                   |
-| bytecode | <code>Buffer</code> | The bytecode buffer which wll be run. |
+| bytecode | <code>Buffer</code> | The bytecode buffer which will be run. |
 | filename | <code>string</code> | The path to the bytecode file.        |
 
 <a name="Bytenode.registerExtension"></a>
