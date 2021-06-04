@@ -134,7 +134,7 @@ user@machine:~$ bytenode -c main.js --use ./node_modules/nw/nwjs/nw
 
 <a name="Bytenode.compile"></a>
 
-### Bytenode.compile({ code, filename, compileAsModule, output }) ⇒ <code>string</code> \| <code>Buffer</code>
+### Bytenode.compile({ code, filename, compileAsModule, createLoader, loaderPattern, output }) ⇒ <code>string</code> \| <code>Buffer</code>
 
 Compiles JavaScript `code` or `filename`.
 
@@ -144,8 +144,10 @@ Compiles JavaScript `code` or `filename`.
 | ---             | ---                  | ---                                                                                                                                                           |
 | code            | <code>string</code>  | The source code that will be compiled.                                                                                                                        |
 | filename        | <code>string</code>  | The JavaScript filename. This filename will be used in stack traces produced by this script. If `code` is not specified, `filename` will be compiled instead. |
-| compileAsModule | <code>boolean</code> | whether to compile `code` or `filename` as a CommonJs module.<br>Defaults to `true`.                                                                               |
-| output          | <code>string</code>  | The output filename.<br>Defaults to the same path and name as `filename`, but with `.jsc` extension.                                                             |
+| compileAsModule | <code>boolean</code> | whether to compile `code` or `filename` as a CommonJs module.<br>Defaults to `true`.                                                                          |
+| createLoader    | <code>boolean</code> | Whether to create loader file along side the compiled file.<br>Defaults to `false`.                                                                           |
+| loaderPattern   | <code>string</code>  | The loader filename or pattern using '%' as filename replacer.<br>Defaults to %.loader.js.                                                                    |
+| output          | <code>string</code>  | The output filename.<br>Defaults to the same path and name as `filename`, but with `.jsc` extension.                                                          |
 
 <a name="Bytenode.run"></a>
 

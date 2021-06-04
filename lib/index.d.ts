@@ -1,9 +1,11 @@
 /// <reference types="node" />
 
-export function compile({ code, filename, compileAsModule, output }: {
+export function compile({ code, filename, compileAsModule, createLoader, loaderPattern, output }: {
   code: string;
   filename: string;
-  compileAsModule?: boolean;
+  compileAsModule?: boolean = true;
+  createLoader?: boolean = false;
+  loaderPattern?: string = '%.loader.js';
   output?: string;
 }): string | Buffer;
 
