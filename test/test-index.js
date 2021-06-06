@@ -67,18 +67,18 @@ it('.compile({ filename }) compiles filename to filename.jsc.', () => {
 
 it('.compile({ filename, output }) compiles filename to output.', () => {
   const filename = path.resolve(__dirname, './hapi-bundle.min.js');
-  const output = path.resolve(__dirname, './hapi-bundle.bin');
+  const output = path.resolve(__dirname, './%.bin');
 
   const returnedOutput = Bytenode.compile({ filename, output });
 
-  assert(output === returnedOutput);
-  assert(fs.existsSync(output));
+  assert(path.parse(returnedOutput).base === 'hapi-bundle.min.bin');
+  assert(fs.existsSync(returnedOutput));
 
   // fs.unlinkSync(output); // keep it, it will be used in the next test.
 });
 
 it(".registerExtension('.bin') enables running '.bin' files.", () => {
-  const output = path.resolve(__dirname, './hapi-bundle.bin');
+  const output = path.resolve(__dirname, './hapi-bundle.min.bin');
 
   Bytenode.registerExtension('.bin');
 
