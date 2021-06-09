@@ -8,129 +8,121 @@ const Bytenode = require('../lib/index.js');
 
 section('Testing Bytenode API:');
 
-it('.compile({ code }) returns a Buffer object.', () => {
-  const code = 'console.log("it works");';
+it('.compileCode({ code }) returns a Buffer object.',
+  () => {
+    const code = 'module.exports = 42;';
+    const filename = path.resolve(__dirname, 'file.js');
 
-  const bytecodeBuffer = Bytenode.compile({ code });
+    const bytecode = Bytenode.compileCode({ code, filename });
 
-  assert(Buffer.isBuffer(bytecodeBuffer));
-});
+    assert(Buffer.isBuffer(bytecode));
 
-it('.compile({ code, filename }) compiles code not filename.', () => {
-  let code = 'module.exports = 42;';
-  let content = 'module.exports = 43;';
-  let filename = path.resolve(__dirname, './43.js');
+    fs.writeFileSync(`${filename}c`, bytecode);
 
-  fs.writeFileSync(filename, content);
-
-  const output = Bytenode.compile({ code, filename });
-
-  assert(require(output) === 42);
-
-  code = '42;';
-  content = '43;';
-  filename = path.resolve(__dirname, './43.js');
-
-  fs.writeFileSync(filename, content);
-
-  const noModuleResult = Bytenode.compile({
-    code,
-    filename,
-    compileAsModule: false
+    assert(require(`${filename}c`) === 42);
   });
 
-  assert(Bytenode.run({ filename: noModuleResult }) === 42);
+it(".compileCode({ compileAsModule: false }) doesn't produces a module.",
+  () => {
+    const code = '42;';
+    const compileAsModule = false;
 
-  fs.unlinkSync(filename);
-  fs.unlinkSync(output);
-});
+    const bytecode = Bytenode.compileCode({ code, compileAsModule });
 
-it('.compile({ compileAsModule: false } produces non-module bytecode.', () => {
-  const code = '42;';
-  const compileAsModule = false;
-
-  const bytecode = Bytenode.compile({ code, compileAsModule });
-
-  assert(Bytenode.run({ bytecode }) === 42);
-});
-
-it('.compile({ filename }) compiles filename to filename.jsc.', () => {
-  const filename = path.resolve(__dirname, './hapi-bundle.min.js');
-
-  const output = Bytenode.compile({ filename });
-
-  assert(output === filename.replace('.js', '.jsc'));
-  assert(fs.existsSync(filename.replace('.js', '.jsc')));
-
-  fs.unlinkSync(filename.replace('.js', '.jsc'));
-});
-
-it('.compile({ filename, output }) compiles filename to output.', () => {
-  const filename = path.resolve(__dirname, './hapi-bundle.min.js');
-  const output = path.resolve(__dirname, './%.bin');
-
-  const returnedOutput = Bytenode.compile({ filename, output });
-
-  assert(path.parse(returnedOutput).base === 'hapi-bundle.min.bin');
-  assert(fs.existsSync(returnedOutput));
-
-  // fs.unlinkSync(output); // keep it, it will be used in the next test.
-});
-
-it(".registerExtension('.bin') enables running '.bin' files.", () => {
-  const output = path.resolve(__dirname, './hapi-bundle.min.bin');
-
-  Bytenode.registerExtension('.bin');
-
-  require(output);
-
-  fs.unlinkSync(output);
-});
-
-it('.registerExtension() throws if ext is not valid.', () => {
-  assert.throws(() => {
-    Bytenode.registerExtension();
+    assert(Bytenode.run({ bytecode }) === 42);
   });
-  assert.throws(() => {
-    Bytenode.registerExtension(43);
-  });
-  assert.throws(() => {
-    Bytenode.registerExtension('jsc');
-  });
-  assert.throws(() => {
-    Bytenode.registerExtension('.jsc');
-  });
-  assert.throws(() => {
-    Bytenode.registerExtension('.js');
-  });
-});
 
-it('.compile() throws if arguments are of the wrong type.', () => {
-  assert.throws(() => {
-    Bytenode.compile();
-  });
-  assert.throws(() => {
-    Bytenode.compile({ code: true });
-  });
-  assert.throws(() => {
-    Bytenode.compile({ filename: 43 });
-  });
-  assert.throws(() => {
-    Bytenode.compile({ filename: './non-existent-file.js' });
-  });
-});
+it('.compileFile({ filename }) compiles filename to filename.jsc.',
+  () => {
+    const filename = path.resolve(__dirname, './hapi-bundle.min.js');
 
-it('.run() throws if arguments are of the wrong type.', () => {
-  assert.throws(() => {
-    Bytenode.run();
+    const output = Bytenode.compileFile({ filename });
+
+    assert(output === filename.replace('.js', '.jsc'));
+    assert(fs.existsSync(filename.replace('.js', '.jsc')));
+
+    fs.unlinkSync(filename.replace('.js', '.jsc'));
   });
-  assert.throws(() => {
-    Bytenode.compile({ bytecode: '' });
+
+it('.compileFile({ filename, output }) compiles filename to output.',
+  () => {
+    const filename = path.resolve(__dirname, './hapi-bundle.min.js');
+    const output = path.resolve(__dirname, './%.bin');
+
+    const returnedOutput = Bytenode.compileFile({ filename, output });
+
+    assert(path.parse(returnedOutput).base === 'hapi-bundle.min.bin');
+    assert(fs.existsSync(returnedOutput));
+
+    // fs.unlinkSync(output); // keep it, it will be used in the next test.
   });
-  assert.throws(() => {
-    Bytenode.compile({ filename: 43 });
+
+it(".registerExtension('.bin') enables requiring '.bin' files.",
+  () => {
+    const output = path.resolve(__dirname, './hapi-bundle.min.bin');
+
+    Bytenode.registerExtension('.bin');
+
+    require(output);
+
+    fs.unlinkSync(output);
   });
-  assert.throws(() => {
-    Bytenode.compile({ filename: './non-existent-file.jsc' });
+
+it('.registerExtension() throws if ext is not valid.',
+  () => {
+    assert.throws(() => {
+      Bytenode.registerExtension();
+    });
+    assert.throws(() => {
+      Bytenode.registerExtension(43);
+    });
+    assert.throws(() => {
+      Bytenode.registerExtension('jsc');
+    });
+    assert.throws(() => {
+      Bytenode.registerExtension('.jsc');
+    });
+    assert.throws(() => {
+      Bytenode.registerExtension('.js');
+    });
   });
-});
+
+it('.compileCode() throws if arguments are of the wrong type.',
+  () => {
+    assert.throws(() => {
+      Bytenode.compileCode();
+    });
+    assert.throws(() => {
+      Bytenode.compileCode({ code: true });
+    });
+    assert.throws(() => {
+      Bytenode.compileCode({ code: '42;', filename: 43 });
+    });
+  });
+
+it('.compileFile() throws if arguments are of the wrong type',
+  () => {
+    assert.throws(() => {
+      Bytenode.compileFile();
+    });
+    assert.throws(() => {
+      Bytenode.compileFile({ filename: './non-existent-file.js' });
+    });
+    // TODO add more assertions for other parameters.
+  });
+
+it('.run() throws if arguments are of the wrong type.',
+  () => {
+    assert.throws(() => {
+      Bytenode.run();
+    });
+    assert.throws(() => {
+      Bytenode.run({ bytecode: '' });
+    });
+    assert.throws(() => {
+      Bytenode.run({ filename: 43 });
+    });
+    assert.throws(() => {
+      Bytenode.run({ filename: './non-existent-file.jsc' });
+    });
+  });
