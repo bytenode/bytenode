@@ -32,6 +32,15 @@ sudo npm install -g bytenode
 
 ---
 
+## Resources
+
+* [How To Compile Node.js Code Using Bytenode](https://hackernoon.com/how-to-compile-node-js-code-using-bytenode-11dcba856fa9)
+* [Bytenode Webpack Plugin](https://github.com/herberttn/bytenode-webpack-plugin)
+* [Creating JS Binaries For Electron](https://www.jjeff.com/blog/2021/4/27/creating-javascript-binaries-for-electron)
+* [Electron Bytenode Example](https://github.com/spaceagetv/electron-bytenode-example)
+
+---
+
 ## Bytenode CLI
 
 ```
