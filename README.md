@@ -22,13 +22,13 @@ sudo npm install -g bytenode
 
 ## Known Issues and Limitations
 
-* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/OsamaAbbas/bytenode/issues/29).
+* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/bytenode/bytenode/issues/29).
 
-* Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/OsamaAbbas/bytenode/issues/34).
+* Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/bytenode/bytenode/issues/34). For a workaround, see [#163](https://github.com/bytenode/bytenode/issues/163)
 
-* In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/OsamaAbbas/bytenode/issues/41).
+* In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/bytenode/bytenode/issues/41).
 
-* Arrow functions (especially Async arrow functions) cause crash in Puppeteer and in Electron apps if used in render processes. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/OsamaAbbas/bytenode/issues/47). They also cause an issue with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). Use the usual async functions instead.
+* Arrow functions (especially Async arrow functions) cause crash in Puppeteer and in Electron apps if used in render processes. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/bytenode/bytenode/issues/47). They also cause an issue with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). Use the usual async functions instead.
 
 ---
 
