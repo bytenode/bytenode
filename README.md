@@ -22,13 +22,20 @@ sudo npm install -g bytenode
 
 ## Known Issues and Limitations
 
-* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/OsamaAbbas/bytenode/issues/29).
+* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/bytenode/bytenode/issues/29).
 
-* Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/OsamaAbbas/bytenode/issues/34).
+* Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/bytenode/bytenode/issues/34). For a workaround, see [#163](https://github.com/bytenode/bytenode/issues/163)
 
-* In recent versions of Node, the `--no-flush-bytecode` must be set. Bytenode sets it internally, but if you encounter any issues, try to run Node with that flag: ` $ node --no-flush-bytecode server.js`. See [#41](https://github.com/OsamaAbbas/bytenode/issues/41).
+* Async Arrow Functions (and Arrow Functions in general) cause crashes in Puppeteer and in Electron apps. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/bytenode/bytenode/issues/47). They also cause issues with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). It seems that whenever there is a context change (or even when called from another file or module), arrow functions break because `V8` inspects them internally using `Function.prototype.toString` in these cases. See [#157](https://github.com/bytenode/bytenode/issues/157).
 
-* Arrow functions (especially Async arrow functions) cause crash in Puppeteer and in Electron apps if used in render processes. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/OsamaAbbas/bytenode/issues/47). They also cause an issue with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). Use the usual async functions instead.
+---
+
+## Resources
+
+* [How To Compile Node.js Code Using Bytenode](https://hackernoon.com/how-to-compile-node-js-code-using-bytenode-11dcba856fa9)
+* [Bytenode Webpack Plugin](https://github.com/herberttn/bytenode-webpack-plugin)
+* [Creating JS Binaries For Electron](https://www.jjeff.com/blog/2021/4/27/creating-javascript-binaries-for-electron)
+* [Electron Bytenode Example](https://github.com/spaceagetv/electron-bytenode-example)
 
 ---
 
