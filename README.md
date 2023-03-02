@@ -125,7 +125,10 @@ Generates v8 bytecode buffer.
 - Example:
 
 ```javascript
-let helloWorldBytecode = bytenode.compileCode(`console.log('Hello World!');`);
+let helloWorldBytecode = bytenode.compileCode(
+  `console.log('Hello World!');
+  43;  // this will be returned`
+);
 ```
 This `helloWorldBytecode` bytecode can be saved to a file. However, if you want to use your code as a module (i.e. if your file has some `exports`), you have to compile it using `bytenode.compileFile({compileAsModule: true})`, or wrap your code manually, using `Module.wrap()` function.
 
@@ -150,7 +153,10 @@ Same as `bytenode.compileCode()`, but generates bytecode for the version of Elec
 - Example:
 
 ```javascript
-let helloWorldBytecode = await bytenode.compileElectronCode(`console.log('Hello World!');`);
+let helloWorldBytecode = await bytenode.compileElectronCode(
+  `console.log('Hello World!');
+  43;  // this will be returned`
+);
 ```
 This `helloWorldBytecode` bytecode can be saved to a file. However, if you want to use your code as a module (i.e. if your file has some `exports`), you have to compile it using `bytenode.compileFile({compileAsModule: true})`, or wrap your code manually, using `Module.wrap()` function.
 
@@ -173,8 +179,10 @@ Runs v8 bytecode buffer and returns the result.
 - Example:
 
 ```javascript
-bytenode.runBytecode(helloWorldBytecode);
+const result = bytenode.runBytecode(helloWorldBytecode);
 // prints: Hello World!
+console.log(result)
+// prints: 43
 ```
 
 ---
@@ -238,11 +246,14 @@ Runs .jsc file and returns the result.
 ```javascript
 // test.js
 console.log('Hello World!');
+43;  // this will be returned
 ```
 
 ```javascript
-bytenode.runBytecodeFile('/path/to/test.jsc');
+const result = bytenode.runBytecodeFile('/path/to/test.jsc');
 // prints: Hello World!
+console.log(result)
+// prints: 43
 ```
 
 ---
