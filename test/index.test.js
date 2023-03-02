@@ -9,7 +9,7 @@ const bytenode = require('../lib/index.js');
 
 const TEMP_DIR = 'temp';
 const TEST_FILE = 'testfile.js';
-const TEST_CODE = "console.log('      Greetings from Bytenode!');";
+const TEST_CODE = "console.log('      Greetings from Bytenode!');43;";
 
 describe('Bytenode', () => {
   let bytecode;
@@ -38,7 +38,9 @@ describe('Bytenode', () => {
   describe('runBytecode()', () => {
     it('runs without error', () => {
       assert.doesNotThrow(() => {
-        bytenode.runBytecode(bytecode);
+        const result = bytenode.runBytecode(bytecode);
+
+        assert.strictEqual(result, 43);
       });
     });
   });
@@ -80,7 +82,9 @@ describe('Bytenode', () => {
 
     it('runs the .jsc file via require()', () => {
       assert.doesNotThrow(() => {
-        require(outputFile);
+        const result = require(outputFile);
+
+        assert.strictEqual(result, 42);
       }, 'Error While Running Loader File');
     });
 
