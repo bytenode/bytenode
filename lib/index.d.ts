@@ -7,7 +7,7 @@ interface BytenodeOptions {
     output?: string;
     compileAsModule?: boolean;
     electron?: boolean;
-    createLoader?: boolean;
+    createLoader?: boolean | string;
     loaderFilename?: string;
 }
 export declare const compileFile: (args: BytenodeOptions | string, output?: string | undefined) => Promise<string>;
