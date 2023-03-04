@@ -55,6 +55,8 @@ sudo npm install -g bytenode
     -l, --loader [ FILE | PATTERN ]   create a loader file and optionally define
                                       loader filename or pattern using % as filename replacer
                                       defaults to %.loader.js
+    --no-loader                       do not create a loader file, conflicts
+                                      with -l
     -t, --loader-type type            create a loader file of type commonjs or
                                       module. Defaults to CommonJS
 
@@ -211,6 +213,7 @@ Asyncrhonous function which compiles JavaScript file to .jsc file.
 | args.electron        | boolean          | If true, the output will be a compiled through Electrong. Default: false.                                |
 | args.output          | string           | The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension. |
 args.createLoader    | boolean \| string | If true, create a CommonJS loader file.  As a string, select between `module` or `commonjs` loader. Default: `false`
+args.loaderFilename  | string            | Filename or pattern for generated loader files. Defaults to originalFilename.loader.js. Use % as a substitute for originalFilename.
 | output               | string           | The output filename. (Deprecated: use args.output instead)                                               |
 
 * Returns:
