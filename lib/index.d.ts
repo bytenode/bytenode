@@ -1,12 +1,16 @@
 /// <reference types="node" />
 export declare const compileCode: (javascriptCode: string) => Buffer;
-export declare const compileElectronCode: (javascriptCode: string) => Promise<Buffer>;
+interface ElectronCompileOptions {
+    electronPath?: string;
+}
+export declare const compileElectronCode: (javascriptCode: string, options?: ElectronCompileOptions) => Promise<Buffer>;
 export declare const runBytecode: (bytecodeBuffer: Buffer) => any;
 interface BytenodeOptions {
     filename: string;
     output?: string;
     compileAsModule?: boolean;
     electron?: boolean;
+    electronPath?: string;
     createLoader?: boolean | string;
     loaderFilename?: string;
 }

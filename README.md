@@ -51,6 +51,7 @@ sudo npm install -g bytenode
     -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
     -n, --no-module                   compile without producing commonjs module
     -e, --electron                    compile for Electron
+    -ep, --electron-path              path to Electron executable
 
     -l, --loader [ FILE | PATTERN ]   create a loader file and optionally define
                                       loader filename or pattern using % as
@@ -146,7 +147,7 @@ This `helloWorldBytecode` bytecode can be saved to a file. However, if you want 
 
 ---
 
-#### bytenode.compileElectronCode(javascriptCode) → {Promise\<Buffer\>}
+#### bytenode.compileElectronCode(javascriptCode, options) → {Promise\<Buffer\>}
 
 Asynchronous function which generates v8 bytecode buffer for Electron.
 
@@ -154,9 +155,11 @@ Same as `bytenode.compileCode()`, but generates bytecode for the version of Elec
 
 * Parameters:
 
-| Name           | Type   | Description                                          |
-| ----           | ----   | -----------                                          |
-| javascriptCode | string | JavaScript source that will be compiled to bytecode. |
+| Name                   | Type   | Description                                          |
+| ----                   | ----   | -----------                                          |
+| javascriptCode         | string | JavaScript source that will be compiled to bytecode. |
+| options                | object | Options object.                                      |
+| options.electronPath   | string | Path to Electron executable.                         |
 
 * Returns:
 
@@ -202,7 +205,7 @@ console.log(result)
 
 #### bytenode.compileFile(args, output) → {Promise\<string\>}
 
-Asyncrhonous function which compiles JavaScript file to .jsc file.
+Asynchronous function which compiles JavaScript file to .jsc file.
 
 * Parameters:
 
@@ -211,7 +214,8 @@ Name                 | Type              | Description
 args                 | object \| string
 args.filename        | string            | The JavaScript source file that will be compiled.
 args.compileAsModule | boolean           | If true, the output will be a commonjs module. Default: true.
-args.electron        | boolean           | If true, the output will be a compiled through Electrong. Default: false.
+args.electron        | boolean           | If true, the output will be a compiled through Electron. Default: false.
+args.electronPath    | string            | Path to Electron executable. Default: Electron binary from node_modules.
 args.output          | string            | The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension.
 args.createLoader    | boolean \| string | If true, create a CommonJS loader file.  As a string, select between `module` or `commonjs` loader. Default: `false`
 args.loaderFilename  | string            | Filename or pattern for generated loader files. Defaults to originalFilename.loader.js. Use % as a substitute for originalFilename.
