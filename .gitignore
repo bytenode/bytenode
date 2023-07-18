@@ -65,3 +65,6 @@ typings/
 
 # dist directory
 dist/
+
+# package-lock.json is unnecessary in this project
+package-lock.json
