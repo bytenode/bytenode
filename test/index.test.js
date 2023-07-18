@@ -6,6 +6,7 @@ const assert = require('assert');
 const fork = require('child_process').fork;
 const { describe, it, before, after } = require('mocha');
 const bytenode = require('../lib/index.js');
+const electronPath = require('electron');
 
 const TEMP_DIR = 'temp';
 const TEST_FILE = 'testfile.js';
@@ -29,6 +30,17 @@ describe('Bytenode', () => {
       let eBytecode;
       await assert.doesNotReject(async () => {
         eBytecode = await bytenode.compileElectronCode(TEST_CODE);
+      }, 'Rejection Error Compiling For Electron');
+      // @ts-ignore
+      assert.notStrictEqual(eBytecode.length, 0, 'Zero Length Buffer');
+    });
+
+    it('compiles code with electron path', async () => {
+      let eBytecode;
+      await assert.doesNotReject(async () => {
+        eBytecode = await bytenode.compileElectronCode(TEST_CODE, {
+          electronPath
+        });
       }, 'Rejection Error Compiling For Electron');
       // @ts-ignore
       assert.notStrictEqual(eBytecode.length, 0, 'Zero Length Buffer');
@@ -111,16 +123,47 @@ describe('Bytenode', () => {
     it('creates non-zero length binary and loader files', async () => {
       await assert.doesNotReject(() => {
         return new Promise((resolve, reject) => {
-          try {
-            bytenode.compileFile({
-              filename: testFilePath,
-              output: outputFile,
-              loaderFilename: '%.js',
-              electron: true
-            }).then(() => resolve());
-          } catch (err) {
-            reject(err);
-          }
+          bytenode.compileFile({
+            filename: testFilePath,
+            output: outputFile,
+            loaderFilename: '%.js',
+            electron: true
+          }).then(() => resolve()).catch(err => reject(err));
+        });
+      });
+      const jscStats = fs.statSync(outputFile);
+      assert.ok(jscStats.isFile(), ".jsc File Doesn't Exist");
+      assert.ok(jscStats.size, 'Zero Length .jsc File');
+      const loaderStats = fs.statSync(loaderFile);
+      assert.ok(loaderStats.isFile(), "Loader File Doesn't Exist");
+      assert.ok(loaderStats.size, 'Zero Length Loader File');
+    });
+
+    it('runs the .jsc file via Electron', async () => {
+      await assert.doesNotReject(() => {
+        return new Promise((resolve, reject) => {
+          const electronPath = path.join('node_modules', 'electron', 'cli.js');
+          const bytenodePath = path.resolve(__dirname, '../lib/cli.js');
+          const proc = fork(electronPath, [bytenodePath, outputFile], {
+            env: { ELECTRON_RUN_AS_NODE: '1' }
+          });
+          proc.on('message', message => console.log(message));
+          proc.on('error', (err) => reject(err));
+          proc.on('exit', () => resolve());
+        });
+      }, 'Rejected While Running .jsc in Electron');
+    });
+
+    it('creates non-zero length binary and loader files with electron path', async () => {
+      rimraf(tempPath, false);
+      await assert.doesNotReject(() => {
+        return new Promise((resolve, reject) => {
+          bytenode.compileFile({
+            filename: testFilePath,
+            output: outputFile,
+            loaderFilename: '%.js',
+            electronPath,
+          }).then(resolve).catch(reject);
         });
       });
       const jscStats = fs.statSync(outputFile);
@@ -156,10 +199,11 @@ describe('Bytenode', () => {
 
 /**
  * Remove directory recursively
- * @param {string} dirPath
+ * @param {string} dirPath - Path to directory
+ * @param {boolean} [removeSelf=true] - Remove directory itself
  * @see https://stackoverflow.com/a/42505874/14350317
  */
-function rimraf (dirPath) {
+function rimraf (dirPath, removeSelf = true) {
   if (fs.existsSync(dirPath)) {
     fs.readdirSync(dirPath).forEach(function (entry) {
       const entryPath = path.join(dirPath, entry);
@@ -169,6 +213,13 @@ function rimraf (dirPath) {
         fs.unlinkSync(entryPath);
       }
     });
-    fs.rmdirSync(dirPath);
+    if (removeSelf) {
+      fs.rmdirSync(dirPath);
+    }
+  } else {
+    if (!removeSelf) {
+      fs.mkdirSync(dirPath);
+    }
   }
 }
+
