@@ -3,9 +3,10 @@ export declare const compileCode: (javascriptCode: string, compress: boolean) =>
 
 interface ElectronCompileOptions {
     electronPath?: string;
+    compress?: boolean;
 }
 
-export declare const compileElectronCode: (javascriptCode: string, compress: boolean, options?: ElectronCompileOptions) => Promise<Buffer>;
+export declare const compileElectronCode: (javascriptCode: string, options?: ElectronCompileOptions) => Promise<Buffer>;
 
 export declare const runBytecode: (bytecodeBuffer: Buffer) => any;
 
