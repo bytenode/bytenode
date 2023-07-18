@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
-const fork = require('child_process').fork;
+const spawn = require('child_process').spawn;
 const { describe, it, before, after } = require('mocha');
 const bytenode = require('../lib/index.js');
 const electronPath = require('electron');
@@ -14,10 +14,22 @@ const TEST_CODE = "console.log('      Greetings from Bytenode!');43;";
 
 describe('Bytenode', () => {
   let bytecode;
+
   describe('compileCode()', () => {
     it('compiles without error', () => {
       assert.doesNotThrow(() => {
         bytecode = bytenode.compileCode(TEST_CODE);
+      });
+    });
+    it('returns non-zero-length buffer', () => {
+      assert.notStrictEqual(bytecode.length, 0);
+    });
+  });
+
+  describe('compileCode(), with compress = true', () => {
+    it('compiles without error', () => {
+      assert.doesNotThrow(() => {
+        bytecode = bytenode.compileCode(TEST_CODE, true);
       });
     });
     it('returns non-zero-length buffer', () => {
@@ -30,6 +42,17 @@ describe('Bytenode', () => {
       let eBytecode;
       await assert.doesNotReject(async () => {
         eBytecode = await bytenode.compileElectronCode(TEST_CODE);
+      }, 'Rejection Error Compiling For Electron');
+      // @ts-ignore
+      assert.notStrictEqual(eBytecode.length, 0, 'Zero Length Buffer');
+    });
+
+    it('compiles code, with compress = true', async () => {
+      let eBytecode;
+      await assert.doesNotReject(async () => {
+        eBytecode = await bytenode.compileElectronCode(TEST_CODE, {
+          compress: true
+        });
       }, 'Rejection Error Compiling For Electron');
       // @ts-ignore
       assert.notStrictEqual(eBytecode.length, 0, 'Zero Length Buffer');
@@ -78,6 +101,28 @@ describe('Bytenode', () => {
               filename: testFilePath,
               output: outputFile,
               loaderFilename: '%.js'
+            }).then(() => resolve());
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+      const jscStats = fs.statSync(outputFile);
+      assert.ok(jscStats.isFile(), ".jsc File Doesn't Exist");
+      assert.ok(jscStats.size, 'Zero Length .jsc File');
+      const loaderStats = fs.statSync(loaderFile);
+      assert.ok(loaderStats.isFile(), "Loader File Doesn't Exist");
+      assert.ok(loaderStats.size, 'Zero Length Loader File');
+    });
+
+    it('compiles with compress = true', async () => {
+      await assert.doesNotReject(() => {
+        return new Promise((resolve, reject) => {
+          try {
+            bytenode.compileFile({
+              filename: testFilePath,
+              output: outputFile,
+              compress: true
             }).then(() => resolve());
           } catch (err) {
             reject(err);
@@ -144,7 +189,7 @@ describe('Bytenode', () => {
         return new Promise((resolve, reject) => {
           const electronPath = path.join('node_modules', 'electron', 'cli.js');
           const bytenodePath = path.resolve(__dirname, '../lib/cli.js');
-          const proc = fork(electronPath, [bytenodePath, outputFile], {
+          const proc = spawn(electronPath, [bytenodePath, outputFile], {
             env: { ELECTRON_RUN_AS_NODE: '1' }
           });
           proc.on('message', message => console.log(message));
@@ -179,7 +224,7 @@ describe('Bytenode', () => {
         return new Promise((resolve, reject) => {
           const electronPath = path.join('node_modules', 'electron', 'cli.js');
           const bytenodePath = path.resolve(__dirname, '../lib/cli.js');
-          const proc = fork(electronPath, [bytenodePath, outputFile], {
+          const proc = spawn(electronPath, [bytenodePath, outputFile], {
             env: { ELECTRON_RUN_AS_NODE: '1' }
           });
           proc.on('message', message => console.log(message));
