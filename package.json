@@ -1,6 +1,6 @@
 {
   "name": "bytenode",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "A minimalist bytecode compiler for Node.js",
   "main": "lib/index.js",
   "bin": "lib/cli.js",
@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/bytenode/bytenode#readme",
   "devDependencies": {
-    "electron": "^29.0.1",
+    "electron": "^29.1.0",
     "mocha": "^10.3.0"
   }
 }
