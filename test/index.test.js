@@ -187,7 +187,7 @@ describe('Bytenode', () => {
     it('runs the .jsc file via Electron', async () => {
       await assert.doesNotReject(() => {
         return new Promise((resolve, reject) => {
-          const electronPath = path.join('node_modules', 'electron', 'cli.js');
+          const electronPath = require('electron');
           const bytenodePath = path.resolve(__dirname, '../lib/cli.js');
           const proc = spawn(electronPath, [bytenodePath, outputFile], {
             env: { ELECTRON_RUN_AS_NODE: '1' }
@@ -222,7 +222,7 @@ describe('Bytenode', () => {
     it('runs the .jsc file via Electron', async () => {
       await assert.doesNotReject(() => {
         return new Promise((resolve, reject) => {
-          const electronPath = path.join('node_modules', 'electron', 'cli.js');
+          const electronPath = require('electron');
           const bytenodePath = path.resolve(__dirname, '../lib/cli.js');
           const proc = spawn(electronPath, [bytenodePath, outputFile], {
             env: { ELECTRON_RUN_AS_NODE: '1' }
