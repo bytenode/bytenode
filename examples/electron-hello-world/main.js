@@ -9,7 +9,7 @@ v8.setFlagsFromString('--no-lazy');
 if (!fs.existsSync('./main-window.jsc')) {
   bytenode.compileFile({
     filename: './main-window.src.js',
-    output: ''./main-window.jsc',
+    output: './main-window.jsc',
     electron: true,
   });
 }
