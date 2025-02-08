@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [20.x, 21.x]
+        node-version: [22.x, 23.x]
         os: [ubuntu-latest]
 
     # run pre-flight tests on ubuntu, instead of full OS support matrix, to reduce costs
