@@ -8,6 +8,8 @@ interface ElectronCompileOptions {
 
 export declare const compileElectronCode: (javascriptCode: string, options?: ElectronCompileOptions) => Promise<Buffer>;
 
+export declare const compileElectronMainCode: (javascriptCode: string, options?: ElectronCompileOptions) => Promise<Buffer>;
+
 export declare const runBytecode: (bytecodeBuffer: Buffer) => any;
 
 interface BytenodeOptions {
@@ -16,6 +18,7 @@ interface BytenodeOptions {
     compileAsModule?: boolean;
     compress?: boolean;
     electron?: boolean;
+    electronMain?: boolean;
     electronPath?: string;
     createLoader?: boolean | string;
     loaderFilename?: string;
