@@ -1,0 +1,13 @@
+{
+  "name": "electron-ipc",
+  "version": "0.0.1",
+  "private": true,
+  "main": "main.loader.js",
+  "scripts": {
+    "start": "node compile.js && electron .",
+    "dev": "electron main.js"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}
