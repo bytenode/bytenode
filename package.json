@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/bytenode/bytenode#readme",
   "devDependencies": {
-    "electron": "^34.1.1",
+    "electron": "^41.0.0",
     "mocha": "^11.1.0"
   }
 }
