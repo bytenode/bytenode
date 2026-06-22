@@ -302,15 +302,18 @@ describe('Bytenode', () => {
 
       await assert.doesNotReject(() => {
         return new Promise((resolve, reject) => {
-          // --no-sandbox on argv: same reason as the compiler in lib/index.js —
-          // the SUID sandbox initializes before the script can disable it.
-          const proc = spawn(electronPath, [runnerPath, '--no-sandbox']); // browser process
+          // --no-sandbox before the script path: same reason as the compiler in
+          // lib/index.js — the SUID sandbox initializes before the script can
+          // disable it, and a switch after the path is treated as an app argument.
+          const proc = spawn(electronPath, ['--no-sandbox', runnerPath]); // browser process
           let out = '';
           let err = '';
           proc.stdout.on('data', (d) => { out += d; });
           proc.stderr.on('data', (d) => { err += d; });
           proc.on('error', reject);
-          proc.on('exit', (code) => {
+          // 'close' (not 'exit') so stdout/stderr are fully drained before we
+          // assert on `out` — matches the production code and avoids truncation.
+          proc.on('close', (code) => {
             if (code === 0 && out.includes('LOADED:42')) resolve();
             else reject(new Error('Loader failed (code ' + code + '): ' + (err || out)));
           });
