@@ -240,6 +240,107 @@ describe('Bytenode', () => {
       }
     });
   });
+
+  describe('compileFile() for Electron main process (electronMain)', () => {
+    // `electronMain` compiles inside a real Electron *browser* process, which is
+    // slow to boot — give each case room. On headless Linux CI the process needs
+    // a virtual display (the workflow wraps the run in xvfb).
+    const tempPath = path.join(__dirname, TEMP_DIR + '-electron-main');
+    const testFilePath = path.join(__dirname, TEST_FILE);
+    const outputFile = path.join(tempPath, TEST_FILE.replace('.js', '.jsc'));
+    const loaderFile = path.join(tempPath, TEST_FILE);
+
+    before(async function () {
+      this.timeout(120000);
+      if (!fs.existsSync(tempPath)) {
+        fs.mkdirSync(tempPath);
+      }
+      await bytenode.compileFile({
+        filename: testFilePath,
+        output: outputFile,
+        loaderFilename: '%.js',
+        electronMain: true
+      });
+    });
+
+    it('creates non-zero length binary and loader files', () => {
+      const jscStats = fs.statSync(outputFile);
+      assert.ok(jscStats.isFile(), ".jsc File Doesn't Exist");
+      assert.ok(jscStats.size, 'Zero Length .jsc File');
+      const loaderStats = fs.statSync(loaderFile);
+      assert.ok(loaderStats.isFile(), "Loader File Doesn't Exist");
+      assert.ok(loaderStats.size, 'Zero Length Loader File');
+    });
+
+    it('produces bytecode that loads in a real Electron main process', async function () {
+      this.timeout(120000);
+      // The whole point of electronMain: the .jsc must load in the browser/main
+      // process (where ELECTRON_RUN_AS_NODE bytecode would be rejected on V8 >=
+      // 14.8). Launch Electron normally (NOT run-as-node) and require the bytecode.
+      const runnerPath = path.join(tempPath, 'runner.js');
+      const repoLib = path.resolve(__dirname, '..', 'lib', 'index.js');
+      const runnerSrc = [
+        "const { app } = require('electron');",
+        'if (typeof app.disableHardwareAcceleration === "function") app.disableHardwareAcceleration();',
+        "if (app.commandLine && app.commandLine.appendSwitch) app.commandLine.appendSwitch('no-sandbox');",
+        // Register bytenode's .jsc require hook, then load the bytecode directly.
+        // (The generated loader uses require('bytenode'), which can't resolve
+        // inside a checkout of bytenode itself.)
+        'require(' + JSON.stringify(repoLib) + ');',
+        'app.whenReady().then(() => {',
+        '  try {',
+        '    const value = require(' + JSON.stringify(outputFile) + ');',
+        '    process.stdout.write("LOADED:" + String(value));',
+        '    app.exit(0);',
+        '  } catch (err) {',
+        '    process.stderr.write(String((err && err.stack) || err));',
+        '    app.exit(1);',
+        '  }',
+        '});'
+      ].join('\n');
+      fs.writeFileSync(runnerPath, runnerSrc);
+
+      await assert.doesNotReject(() => {
+        return new Promise((resolve, reject) => {
+          // --no-sandbox on argv: same reason as the compiler in lib/index.js —
+          // the SUID sandbox initializes before the script can disable it.
+          const proc = spawn(electronPath, [runnerPath, '--no-sandbox']); // browser process
+          let out = '';
+          let err = '';
+          proc.stdout.on('data', (d) => { out += d; });
+          proc.stderr.on('data', (d) => { err += d; });
+          proc.on('error', reject);
+          proc.on('exit', (code) => {
+            if (code === 0 && out.includes('LOADED:42')) resolve();
+            else reject(new Error('Loader failed (code ' + code + '): ' + (err || out)));
+          });
+        });
+      }, 'electronMain .jsc failed to load in an Electron main process');
+    });
+
+    it('rejects with the underlying error when compilation fails', async function () {
+      this.timeout(120000);
+      const badFile = path.join(tempPath, 'bad-input.js');
+      fs.writeFileSync(badFile, 'const x = ;'); // guaranteed SyntaxError
+      await assert.rejects(
+        () => bytenode.compileFile({
+          filename: badFile,
+          output: path.join(tempPath, 'bad.jsc'),
+          electronMain: true
+        }),
+        // The real compile error must be surfaced to the caller, not swallowed
+        // behind a generic "exit code 1". (Regression guard for the error contract.)
+        (e) => /SyntaxError/.test(e.message),
+        'expected the underlying SyntaxError to surface in the rejection'
+      );
+    });
+
+    after(() => {
+      if (fs.existsSync(tempPath)) {
+        rimraf(tempPath);
+      }
+    });
+  });
 });
 
 /**
