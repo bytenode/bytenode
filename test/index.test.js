@@ -240,6 +240,85 @@ describe('Bytenode', () => {
       }
     });
   });
+
+  describe('compileFile() with electronRenderer = true', function () {
+    this.timeout(60000);
+
+    const tempPath = path.join(__dirname, TEMP_DIR);
+    before(() => {
+      if (!fs.existsSync(tempPath)) {
+        fs.mkdirSync(tempPath);
+      }
+    });
+
+    const testFilePath = path.join(__dirname, TEST_FILE);
+    const outputFile = path.join(tempPath, TEST_FILE.replace('.js', '.jsc'));
+
+    it('creates a non-zero length binary file', async () => {
+      await bytenode.compileFile({
+        filename: testFilePath,
+        output: outputFile,
+        electronRenderer: true
+      });
+      assert.ok(fs.statSync(outputFile).size, 'Zero Length .jsc File');
+    });
+
+    it('rejects electronMain combined with electronRenderer', async () => {
+      await assert.rejects(bytenode.compileFile({
+        filename: testFilePath,
+        output: outputFile,
+        electronMain: true,
+        electronRenderer: true
+      }), /mutually exclusive/);
+    });
+
+    it('runs the .jsc file in a preload script', async () => {
+      // A hidden window whose preload requires the .jsc and reports the result.
+      const preload = path.join(tempPath, 'preload.js');
+      const main = path.join(tempPath, 'main.js');
+      fs.writeFileSync(preload, [
+        "const { ipcRenderer } = require('electron');",
+        'try {',
+        '  require(' + JSON.stringify(path.resolve(__dirname, '../lib/index.js')) + ');',
+        "  ipcRenderer.send('result', require(" + JSON.stringify(outputFile) + '));',
+        '} catch (err) {',
+        "  ipcRenderer.send('result', String(err));",
+        '}'
+      ].join('\n'));
+      fs.writeFileSync(main, [
+        "const { app, BrowserWindow, ipcMain } = require('electron');",
+        'app.disableHardwareAcceleration();',
+        "ipcMain.on('result', (_e, r) => { process.stdout.write('RESULT ' + JSON.stringify(r) + '\\n'); app.exit(0); });",
+        'app.whenReady().then(() => {',
+        '  const win = new BrowserWindow({ show: false, webPreferences: {',
+        '    preload: ' + JSON.stringify(preload) + ', nodeIntegration: true, contextIsolation: false, sandbox: false } });',
+        "  win.webContents.on('render-process-gone', () => app.exit(2));",
+        "  win.loadURL('about:blank');",
+        '});'
+      ].join('\n'));
+
+      const args = [main, '--no-sandbox', '--user-data-dir=' + path.join(tempPath, 'user-data')];
+      const env = Object.assign({}, process.env);
+      delete env.ELECTRON_RUN_AS_NODE;
+
+      const output = await new Promise((resolve, reject) => {
+        let out = '';
+        const proc = spawn(electronPath, args, { env });
+        proc.stdout.on('data', chunk => { out += chunk; });
+        proc.stderr.on('data', chunk => { out += chunk; });
+        proc.on('error', reject);
+        proc.on('close', () => resolve(out));
+      });
+
+      assert.ok(output.includes('RESULT 42'), 'Unexpected preload output:\n' + output);
+    });
+
+    after(() => {
+      if (fs.existsSync(tempPath)) {
+        rimraf(tempPath);
+      }
+    });
+  });
 });
 
 /**

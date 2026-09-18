@@ -32,5 +32,9 @@ jobs:
             npm-${{ runner.os }}-${{ matrix.node-version }}-
       - name: Install Packages
         run: npm install
+      # The electronMain tests launch a real Electron browser process, which
+      # needs a display on Linux. Provide a virtual one via Xvfb.
+      - name: Install Xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
       - name: Run Tests
-        run: npm test
+        run: xvfb-run --auto-servernum npm test
