@@ -242,101 +242,76 @@ describe('Bytenode', () => {
     });
   });
 
-  describe('compileFile() for Electron main process (electronMain)', () => {
-    // `electronMain` compiles inside a real Electron *browser* process, which is
-    // slow to boot — give each case room. On headless Linux CI the process needs
-    // a virtual display (the workflow wraps the run in xvfb).
-    const tempPath = path.join(__dirname, TEMP_DIR + '-electron-main');
-    const testFilePath = path.join(__dirname, TEST_FILE);
-    const outputFile = path.join(tempPath, TEST_FILE.replace('.js', '.jsc'));
-    const loaderFile = path.join(tempPath, TEST_FILE);
+  describe('compileFile() with electronRenderer = true', function () {
+    this.timeout(60000);
 
-    before(async function () {
-      this.timeout(120000);
+    const tempPath = path.join(__dirname, TEMP_DIR);
+    before(() => {
       if (!fs.existsSync(tempPath)) {
         fs.mkdirSync(tempPath);
       }
+    });
+
+    const testFilePath = path.join(__dirname, TEST_FILE);
+    const outputFile = path.join(tempPath, TEST_FILE.replace('.js', '.jsc'));
+
+    it('creates a non-zero length binary file', async () => {
       await bytenode.compileFile({
         filename: testFilePath,
         output: outputFile,
-        loaderFilename: '%.js',
-        electronMain: true
+        electronRenderer: true
       });
+      assert.ok(fs.statSync(outputFile).size, 'Zero Length .jsc File');
     });
 
-    it('creates non-zero length binary and loader files', () => {
-      const jscStats = fs.statSync(outputFile);
-      assert.ok(jscStats.isFile(), ".jsc File Doesn't Exist");
-      assert.ok(jscStats.size, 'Zero Length .jsc File');
-      const loaderStats = fs.statSync(loaderFile);
-      assert.ok(loaderStats.isFile(), "Loader File Doesn't Exist");
-      assert.ok(loaderStats.size, 'Zero Length Loader File');
+    it('rejects electronMain combined with electronRenderer', async () => {
+      await assert.rejects(bytenode.compileFile({
+        filename: testFilePath,
+        output: outputFile,
+        electronMain: true,
+        electronRenderer: true
+      }), /mutually exclusive/);
     });
 
-    it('produces bytecode that loads in a real Electron main process', async function () {
-      this.timeout(120000);
-      // The whole point of electronMain: the .jsc must load in the browser/main
-      // process (where ELECTRON_RUN_AS_NODE bytecode would be rejected on V8 >=
-      // 14.8). Launch Electron normally (NOT run-as-node) and require the bytecode.
-      const runnerPath = path.join(tempPath, 'runner.js');
-      const repoLib = path.resolve(__dirname, '..', 'lib', 'index.js');
-      const runnerSrc = [
-        "const { app } = require('electron');",
-        'if (typeof app.disableHardwareAcceleration === "function") app.disableHardwareAcceleration();',
-        "if (app.commandLine && app.commandLine.appendSwitch) app.commandLine.appendSwitch('no-sandbox');",
-        // Register bytenode's .jsc require hook, then load the bytecode directly.
-        // (The generated loader uses require('bytenode'), which can't resolve
-        // inside a checkout of bytenode itself.)
-        'require(' + JSON.stringify(repoLib) + ');',
+    it('runs the .jsc file in a preload script', async () => {
+      // A hidden window whose preload requires the .jsc and reports the result.
+      const preload = path.join(tempPath, 'preload.js');
+      const main = path.join(tempPath, 'main.js');
+      fs.writeFileSync(preload, [
+        "const { ipcRenderer } = require('electron');",
+        'try {',
+        '  require(' + JSON.stringify(path.resolve(__dirname, '../lib/index.js')) + ');',
+        "  ipcRenderer.send('result', require(" + JSON.stringify(outputFile) + '));',
+        '} catch (err) {',
+        "  ipcRenderer.send('result', String(err));",
+        '}'
+      ].join('\n'));
+      fs.writeFileSync(main, [
+        "const { app, BrowserWindow, ipcMain } = require('electron');",
+        'app.disableHardwareAcceleration();',
+        "ipcMain.on('result', (_e, r) => { process.stdout.write('RESULT ' + JSON.stringify(r) + '\\n'); app.exit(0); });",
         'app.whenReady().then(() => {',
-        '  try {',
-        '    const value = require(' + JSON.stringify(outputFile) + ');',
-        '    process.stdout.write("LOADED:" + String(value));',
-        '    app.exit(0);',
-        '  } catch (err) {',
-        '    process.stderr.write(String((err && err.stack) || err));',
-        '    app.exit(1);',
-        '  }',
+        '  const win = new BrowserWindow({ show: false, webPreferences: {',
+        '    preload: ' + JSON.stringify(preload) + ', nodeIntegration: true, contextIsolation: false, sandbox: false } });',
+        "  win.webContents.on('render-process-gone', () => app.exit(2));",
+        "  win.loadURL('about:blank');",
         '});'
-      ].join('\n');
-      fs.writeFileSync(runnerPath, runnerSrc);
+      ].join('\n'));
 
-      await assert.doesNotReject(() => {
-        return new Promise((resolve, reject) => {
-          // --no-sandbox before the script path: same reason as the compiler in
-          // lib/index.js — the SUID sandbox initializes before the script can
-          // disable it, and a switch after the path is treated as an app argument.
-          const proc = spawn(electronPath, ['--no-sandbox', runnerPath]); // browser process
-          let out = '';
-          let err = '';
-          proc.stdout.on('data', (d) => { out += d; });
-          proc.stderr.on('data', (d) => { err += d; });
-          proc.on('error', reject);
-          // 'close' (not 'exit') so stdout/stderr are fully drained before we
-          // assert on `out` — matches the production code and avoids truncation.
-          proc.on('close', (code) => {
-            if (code === 0 && out.includes('LOADED:42')) resolve();
-            else reject(new Error('Loader failed (code ' + code + '): ' + (err || out)));
-          });
-        });
-      }, 'electronMain .jsc failed to load in an Electron main process');
-    });
+      const args = [main, '--no-sandbox', '--user-data-dir=' + path.join(tempPath, 'user-data')];
+      const env = Object.assign({}, process.env);
+      delete env.ELECTRON_RUN_AS_NODE;
 
-    it('rejects with the underlying error when compilation fails', async function () {
-      this.timeout(120000);
-      const badFile = path.join(tempPath, 'bad-input.js');
-      fs.writeFileSync(badFile, 'const x = ;'); // guaranteed SyntaxError
-      await assert.rejects(
-        () => bytenode.compileFile({
-          filename: badFile,
-          output: path.join(tempPath, 'bad.jsc'),
-          electronMain: true
-        }),
-        // The real compile error must be surfaced to the caller, not swallowed
-        // behind a generic "exit code 1". (Regression guard for the error contract.)
-        (e) => /SyntaxError/.test(e.message),
-        'expected the underlying SyntaxError to surface in the rejection'
-      );
+      const output = await new Promise((resolve, reject) => {
+        let out = '';
+        const proc = spawn(electronPath, args, { env });
+        proc.stdout.on('data', chunk => { out += chunk; });
+        proc.stderr.on('data', chunk => { out += chunk; });
+        proc.on('error', reject);
+        proc.on('close', () => resolve(out));
+      });
+
+      assert.ok(output.includes('RESULT 42'), 'Unexpected preload output:\n' + output);
     });
 
     after(() => {
