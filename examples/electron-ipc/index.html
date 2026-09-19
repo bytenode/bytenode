@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+  </head>
+
+  <body>
+    <input id="message" type="text" value="Message to be encoded." /><br />
+    <button id="encode">Encode message</button> <br /><br />
+    <span id="result"></span>
+
+    <script>
+      document.getElementById("encode").addEventListener("click", async () => {
+        const message = document.getElementById("message").value;
+        console.log("From renderer:", message);
+
+        // `window.encodeMessage` is defined in `preload.js`, and handled in `main.js`
+        const response = await window.encodeMessage(message);
+        console.log("From main process:", response);
+        document.getElementById("result").innerText = "Encoded: " + response;
+      });
+    </script>
+  </body>
+</html>
