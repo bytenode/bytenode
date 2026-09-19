@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const spawn = require('child_process').spawn;
+const spawnSync = require('child_process').spawnSync;
 const { describe, it, before, after } = require('mocha');
 const bytenode = require('../lib/index.js');
 const electronPath = require('electron');
