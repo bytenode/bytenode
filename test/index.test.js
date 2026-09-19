@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const spawn = require('child_process').spawn;
+const spawnSync = require('child_process').spawnSync;
 const { describe, it, before, after } = require('mocha');
 const bytenode = require('../lib/index.js');
 const electronPath = require('electron');
@@ -238,6 +239,57 @@ describe('Bytenode', () => {
       if (fs.existsSync(tempPath)) {
         rimraf(tempPath);
       }
+    });
+  });
+
+  describe('CLI --compile exit status', () => {
+    const cliPath = path.resolve(__dirname, '../lib/cli.js');
+    const tempPath = path.join(__dirname, 'cli-tmp');
+
+    before(() => {
+      if (!fs.existsSync(tempPath)) {
+        fs.mkdirSync(tempPath);
+      }
+    });
+
+    after(() => {
+      if (fs.existsSync(tempPath)) {
+        rimraf(tempPath);
+      }
+    });
+
+    it('exits with status 1 when the source has a syntax error', () => {
+      const filename = path.join(tempPath, 'syntax-error.js');
+      fs.writeFileSync(filename, '});\n');
+      const result = spawnSync(process.execPath, [cliPath, '-c', filename], {
+        encoding: 'utf8'
+      });
+      assert.strictEqual(result.status, 1);
+    });
+
+    it('exits with status 1 when the input file does not exist', () => {
+      const filename = path.join(tempPath, 'no-such-file.js');
+      const result = spawnSync(process.execPath, [cliPath, '-c', filename], {
+        encoding: 'utf8'
+      });
+      assert.strictEqual(result.status, 1);
+    });
+
+    it('exits with status 1 when stdin source has a syntax error', () => {
+      const result = spawnSync(process.execPath, [cliPath, '--compile', '--no-module', '-'], {
+        encoding: 'utf8',
+        input: '});\n'
+      });
+      assert.strictEqual(result.status, 1);
+    });
+
+    it('exits with status 0 when compilation succeeds', () => {
+      const filename = path.join(tempPath, 'ok.js');
+      fs.writeFileSync(filename, 'module.exports = 1;\n');
+      const result = spawnSync(process.execPath, [cliPath, '-c', filename], {
+        encoding: 'utf8'
+      });
+      assert.strictEqual(result.status, 0);
     });
   });
 });
