@@ -25,6 +25,8 @@ interface BytenodeOptions {
     electronPath?: string;
     createLoader?: boolean | string;
     loaderFilename?: string;
+    /** Write an external source map at `<output>.map` for error stack traces. */
+    sourceMap?: boolean;
 }
 
 export declare const compileFile: (args: BytenodeOptions | string, output?: string | undefined) => Promise<string>;

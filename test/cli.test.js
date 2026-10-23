@@ -50,6 +50,19 @@ describe('Bytenode CLI', function () {
     assert.ok(fs.existsSync(path.join(directory, 'input.loader.js')));
   });
 
+  it('writes a source map when requested', () => {
+    const source = path.join(directory, 'mapped.js');
+    fs.writeFileSync(source, 'module.exports = 42;\n');
+
+    const result = runNode(cli, ['--compile', '--source-map', source]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(fs.existsSync(path.join(directory, 'mapped.jsc.map')));
+
+    const stdin = runNode(cli, ['--compile', '--source-map', '-'], { input: '40 + 2;' });
+    assert.equal(stdin.status, 1);
+    assert.match(stdin.stderr, /requires one or more input files/);
+  });
+
   it('compiles stdin into a runnable plain-script cache', () => {
     const result = runNode(cli, ['--compile', '--no-module', '-'], { input: '40 + 2;', encoding: null });
 

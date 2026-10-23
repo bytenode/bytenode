@@ -94,6 +94,49 @@ describe('Bytenode public API', function () {
     assert.equal(require(plainOutput), 42);
   });
 
+  it('writes an external source map and maps thrown errors back to source lines', async () => {
+    const source = path.join(directory, 'mapped-source.js');
+    const output = path.join(directory, 'mapped-output.jsc');
+    fs.writeFileSync(source, [
+      '#!/usr/bin/env node',
+      'function fail() {',
+      '  const detail = "debug me";',
+      '  throw new Error(detail);',
+      '}',
+      'fail();',
+      ''
+    ].join('\n'));
+
+    await bytenode.compileFile({ filename: source, output, sourceMap: true });
+
+    const mapFilename = output + '.map';
+    assert.ok(fs.existsSync(mapFilename));
+    const map = JSON.parse(fs.readFileSync(mapFilename, 'utf8'));
+    assert.equal(map.version, 3);
+    assert.equal(map.file, path.basename(output));
+    assert.deepEqual(map.sources, [path.basename(source)]);
+    assert.equal(Object.prototype.hasOwnProperty.call(map, 'sourcesContent'), false,
+      'the external map should not expose embedded source text');
+
+    assert.throws(() => require(output), (error) => {
+      assert.ok(error.stack.includes(`${source}:4:9`), error.stack);
+      assert.match(error.stack, /at fail \(/);
+      return true;
+    });
+
+    const plainOutput = path.join(directory, 'mapped-plain.jsc');
+    await bytenode.compileFile({
+      filename: source,
+      output: plainOutput,
+      compileAsModule: false,
+      sourceMap: true
+    });
+    assert.throws(() => bytenode.runBytecodeFile(plainOutput), (error) => {
+      assert.ok(error.stack.includes(`${source}:4:9`), error.stack);
+      return true;
+    });
+  });
+
   it('writes a CommonJS loader beside the compiled file', async () => {
     const source = path.join(directory, 'loader-source.js');
     fs.writeFileSync(source, '#!/usr/bin/env node\nmodule.exports = 7;\n');

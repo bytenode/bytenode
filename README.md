@@ -69,6 +69,7 @@ sudo npm install -g bytenode
 
     -c, --compile [ FILE... | - ]     compile stdin, a file, or a list of files
     --compress                        compress bytecode
+    --source-map                      write an external source map beside each .jsc file
     -n, --no-module                   compile without producing commonjs module
     -e, --electron                    compile for Electron
     -ep, --electron-path              path to Electron executable
@@ -303,6 +304,7 @@ args.electronMain    | boolean           | If true, compile inside an actual Ele
 args.electronRenderer | boolean          | If true, compile inside an Electron **renderer** (a hidden window's preload). Use for renderer/preload bytecode on Electron versions that require the renderer snapshot (reported from 43.5.1). Cannot be combined with `electronMain`. Default: false.
 args.electronPath    | string            | Path to Electron executable. Default: Electron binary from node_modules.
 args.output          | string            | The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension.
+args.sourceMap       | boolean           | If true, write `<output>.map` and map runtime error stack traces back to the source file. Default: false.
 args.createLoader    | boolean \| string | If true, create a CommonJS loader file.  As a string, select between `module` or `commonjs` loader. Default: `false`
 args.loaderFilename  | string            | Filename or pattern for generated loader files. Defaults to originalFilename.loader.js. Use % as a substitute for originalFilename.
 output               | string            | The output filename. (Deprecated: use args.output instead)
@@ -316,9 +318,16 @@ output               | string            | The output filename. (Deprecated: use
 ```javascript
 let compiledFilename = bytenode.compileFile({
   filename: '/path/to/your/file.js',
+  sourceMap: true,
   output: '/path/to/compiled/file.jsc' // if omitted, it defaults to '/path/to/your/file.jsc'
 });
 ```
+
+When `sourceMap` is enabled, Bytenode writes a separate standard source map at
+`<output>.map` (for example, `file.jsc.map`). It does not include source text in
+the map. Keep this file next to the `.jsc` while debugging so Bytenode can map
+runtime error stacks; delete it before shipping if you do not want to distribute
+debugging metadata. The CLI equivalent is `bytenode --compile --source-map file.js`.
 
 Previous code will produce a commonjs module that can be required using `require` function.
 
