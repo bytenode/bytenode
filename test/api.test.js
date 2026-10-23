@@ -154,6 +154,17 @@ describe('Bytenode public API', function () {
       /^#!\/usr\/bin\/env node\n/);
   });
 
+  it('writes an ES module loader that re-exports the compiled module', async () => {
+    const source = path.join(directory, 'esm-source.js');
+    fs.writeFileSync(source, 'module.exports = { answer: 42 };\n');
+
+    await bytenode.compileFile({ filename: source, createLoader: 'module' });
+
+    const loader = fs.readFileSync(path.join(directory, 'esm-source.loader.js'), 'utf8');
+    assert.match(loader, /require\('\.\/esm-source\.jsc'\)/);
+    assert.match(loader, /export \{ answer \}/);
+  });
+
   it('validates compileFile arguments before reading input', async () => {
     await assert.rejects(bytenode.compileFile(), /filename must be a string/);
     await assert.rejects(

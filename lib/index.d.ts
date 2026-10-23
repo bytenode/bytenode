@@ -47,7 +47,7 @@ export declare function loaderCodeCommonJS(targetPath: string, sheBang?: RegExpM
 export declare function loaderCodeModule(
     targetPath: string,
     sheBang?: RegExpMatchArray | null,
-    loaderFilePath?: string
+    compiledFilePath?: string
 ): string;
 
 export { };
