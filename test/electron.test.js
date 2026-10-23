@@ -90,6 +90,17 @@ guiTests('Electron process-specific bytecode', function () {
     assert.match(result.stdout, /LOADED:42/);
   });
 
+  it('surfaces the underlying error when electronMain compilation fails', async () => {
+    const source = path.join(directory, 'bad-main.js');
+    fs.writeFileSync(source, 'const x = ;\n');
+
+    // The real compile error must reach the caller, not a bare "exit code 1".
+    await assert.rejects(
+      bytenode.compileFile({ filename: source, output: path.join(directory, 'bad-main.jsc'), electronMain: true }),
+      /SyntaxError/
+    );
+  });
+
   it('loads renderer bytecode from a preload script', async () => {
     const source = path.join(directory, 'renderer-module.js');
     const output = path.join(directory, 'renderer-module.jsc');
