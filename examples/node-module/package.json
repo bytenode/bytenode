@@ -1,0 +1,11 @@
+{
+  "name": "bytenode-node-module-example",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "start": "node run.js"
+  },
+  "dependencies": {
+    "bytenode": "file:../.."
+  }
+}

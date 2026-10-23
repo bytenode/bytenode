@@ -1,5 +1,5 @@
 /// <reference types="node" />
-export declare const compileCode: (javascriptCode: string, compress: boolean) => Buffer;
+export declare const compileCode: (javascriptCode: string, compress?: boolean) => Buffer;
 
 interface ElectronCompileOptions {
     electronPath?: string;
@@ -31,8 +31,21 @@ export declare const compileFile: (args: BytenodeOptions | string, output?: stri
 
 export declare const runBytecodeFile: (filename: string) => any;
 
-export declare function addLoaderFile(fileToLoad: string, loaderFilename?: string): void;
+export declare function addLoaderFile(
+    fileToLoad: string,
+    loaderFilename?: string | boolean,
+    type?: 'module' | 'commonjs',
+    sheBang?: RegExpMatchArray | null
+): void;
 
-export declare function loaderCode(targetPath: string): string;
+export declare function loaderCode(targetPath: string, sheBang?: RegExpMatchArray | null): string;
+
+export declare function loaderCodeCommonJS(targetPath: string, sheBang?: RegExpMatchArray | null): string;
+
+export declare function loaderCodeModule(
+    targetPath: string,
+    sheBang?: RegExpMatchArray | null,
+    loaderFilePath?: string
+): string;
 
 export { };

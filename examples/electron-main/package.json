@@ -1,0 +1,14 @@
+{
+  "name": "bytenode-electron-main-example",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "start": "electron dist/main.loader.js"
+  },
+  "dependencies": {
+    "bytenode": "file:../.."
+  },
+  "devDependencies": {
+    "electron": "^45.0.0"
+  }
+}

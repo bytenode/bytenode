@@ -2,7 +2,7 @@
 
 A minimalist bytecode compiler for Node.js.
 
-This tool truly compiles your JavaScript code into `V8` bytecode, so that you can protect your source code. It can be used with Node.js, as well as Electron and NW.js (check `examples/` directory).
+This tool truly compiles your JavaScript code into `V8` bytecode, so that you can protect your source code. It runs on Node.js and Electron. See [`examples/`](examples/) for current runnable projects.
 
 ---
 
@@ -30,13 +30,13 @@ sudo npm install -g bytenode
 
 * **Electron ≥ 42 (V8 ≥ 14.8): bytecode compiled via `ELECTRON_RUN_AS_NODE` crashes the main process with `SIGTRAP`.** V8's serialized bytecode header carries a *read-only snapshot checksum* (header offset 16). The Electron **main/browser** process boots V8 from Chromium's `v8_context_snapshot`, whose read-only heap differs from the Node default snapshot used by `ELECTRON_RUN_AS_NODE`. So a `.jsc` produced with `compileElectronCode()` (run-as-node) carries a checksum that does not match the main process. Starting with V8 14.8 this no longer fails gracefully (`cachedDataRejected`) but hard-aborts (`EXC_BREAKPOINT` / `SIGTRAP`) while deserializing. The fix is to compile in the **same process type** that will load the `.jsc` — use [`compileElectronMainCode()`](#bytenodecompileelectronmaincodejavascriptcode-options--promisebuffer) or `compileFile({ electronMain: true })`, which compile inside an actual Electron main process. (On Electron ≤ 41 / V8 ≤ 14.6 the two checksums happened to be compatible, so `electron: true` worked there.)
 
-* **Electron ≥ 43.5.1: preload scripts and renderer pages need `electronRenderer: true`.** The renderer has its own read-only snapshot, and since 43.5.1 it no longer matches the Node snapshot. Bytecode compiled with `electron: true` *or* `electronMain: true` is rejected there with `Invalid or incompatible cached data (cachedDataRejected)` (in a page it can surface as `compiledWrapper.apply is not a function`). Use [`compileElectronRendererCode()`](#bytenodecompileelectronrenderercodejavascriptcode-options--promisebuffer) or `compileFile({ electronRenderer: true })`, which compile inside a hidden window's preload. Renderer bytecode is renderer-only: it is rejected in the main process and in worker threads, so compile each file for the context that loads it. See [#265](https://github.com/bytenode/bytenode/issues/265).
+* **Electron renderer bytecode is context-specific.** On Electron 43.5.1 and later, the renderer snapshot differs from the Node and main-process snapshots. The project’s reported checks found that bytecode compiled with `electron: true` or `electronMain: true` was rejected by renderer preloads/pages, while renderer-compiled bytecode loaded in both. Use [`compileElectronRendererCode()`](#bytenodecompileelectronrenderercodejavascriptcode-options--promisebuffer) or `compileFile({ electronRenderer: true })` for renderer code. This mode compiles in a hidden window’s preload, so the result is suitable for renderer/preload contexts and should not be used in the main process or worker threads. The reported compatibility checks covered Electron 43.4.1, 43.5.1, 43.7.3, and 44.4.3; verify the mode against the exact Electron versions you ship. See [#265](https://github.com/bytenode/bytenode/issues/265).
 
-  | Loaded in                 | 43.4.1                            | ≥ 43.5.1 (tested to 44.4.3)                 |
+  | Loaded in                 | Electron 43.4.1                   | Electron 43.5.1, 43.7.3, 44.4.3             |
   | ----                      | ----                              | ----                                        |
   | main, `worker_threads`    | `electronMain`                    | `electronMain` or `electron`                |
   | `utilityProcess`          | `electron`                        | `electron` or `electronMain`                |
-  | preload, renderer page    | `electron` or `electronRenderer`  | **`electronRenderer` only**                 |
+  | preload, renderer page    | `electron` or `electronRenderer`  | `electronRenderer` only                      |
 
 ---
 
@@ -46,6 +46,15 @@ sudo npm install -g bytenode
 * [Bytenode Webpack Plugin](https://github.com/herberttn/bytenode-webpack-plugin)
 * [Creating JS Binaries For Electron](https://www.jjeff.com/blog/2021/4/27/creating-javascript-binaries-for-electron)
 * [Electron Bytenode Example](https://github.com/spaceagetv/electron-bytenode-example)
+
+---
+
+## Examples
+
+- [Node.js CommonJS module](examples/node-module/README.md): compile a module,
+  generate a loader, and require its exports.
+- [Electron main process](examples/electron-main/README.md): compile the main
+  process in Electron and run it through the generated loader.
 
 ---
 
@@ -234,7 +243,7 @@ let helloWorldBytecode = await bytenode.compileElectronMainCode(
 
 Asynchronous function which generates v8 bytecode buffer by compiling inside an Electron **renderer process** — the preload script of a hidden `BrowserWindow`.
 
-Use this for code that will be loaded from a **preload script or a renderer page** on **Electron ≥ 43.5.1**, where neither `compileElectronCode()` nor `compileElectronMainCode()` output is accepted (see [Known Issues](#known-issues-and-limitations)). The output is rejected in the main process and in worker threads.
+Use this for code that will be loaded from a **preload script or a renderer page** on Electron versions where renderer bytecode needs its own snapshot (reported from Electron 43.5.1; see [Known Issues](#known-issues-and-limitations)). `compileElectronCode()` and `compileElectronMainCode()` output is not interchangeable with renderer output on those versions. The output is renderer-specific and should not be loaded in the main process or worker threads.
 
 It briefly launches Electron with a hidden window, using a private temporary `--user-data-dir`, then exits. The CI notes for `compileElectronMainCode()` apply (on Linux, run it under `xvfb-run`).
 
@@ -291,7 +300,7 @@ args.filename        | string            | The JavaScript source file that will 
 args.compileAsModule | boolean           | If true, the output will be a commonjs module. Default: true.
 args.electron        | boolean           | If true, the output will be compiled through Electron via `ELECTRON_RUN_AS_NODE`. Default: false.
 args.electronMain    | boolean           | If true, compile inside an actual Electron **main process** instead of `ELECTRON_RUN_AS_NODE`. Required for Electron ≥ 42 (V8 ≥ 14.8) when the `.jsc` is loaded from the main process. See [Known Issues](#known-issues-and-limitations). Default: false.
-args.electronRenderer | boolean          | If true, compile inside an Electron **renderer** (a hidden window's preload). Required for Electron ≥ 43.5.1 when the `.jsc` is loaded from a preload script or renderer page. Cannot be combined with `electronMain`. Default: false.
+args.electronRenderer | boolean          | If true, compile inside an Electron **renderer** (a hidden window's preload). Use for renderer/preload bytecode on Electron versions that require the renderer snapshot (reported from 43.5.1). Cannot be combined with `electronMain`. Default: false.
 args.electronPath    | string            | Path to Electron executable. Default: Electron binary from node_modules.
 args.output          | string            | The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension.
 args.createLoader    | boolean \| string | If true, create a CommonJS loader file.  As a string, select between `module` or `commonjs` loader. Default: `false`
@@ -333,7 +342,7 @@ let compiledFilename = await bytenode.compileFile({
   // electron: true  // legacy ELECTRON_RUN_AS_NODE compile (Electron <= 41)
 });
 
-// Preload scripts and renderer pages (Electron >= 43.5.1):
+// Preload scripts and renderer pages when renderer-specific bytecode is needed:
 await bytenode.compileFile({
   filename: '/path/to/your/preload.js',
   output: '/path/to/compiled/preload.jsc',
