@@ -20,32 +20,40 @@ sudo npm install -g bytenode
 
 ---
 
+## Security and Code Protection Note
+
+Bytenode compiles JavaScript into V8 bytecode, which removes original source formatting, comments, and variable names, drastically increasing the barrier to entry for reverse engineering. However, be aware that V8 bytecode is not encryption. Decompilation and analysis tools exist, such as View8 and Ghidra plugins. These tools are valuable for the cybersecurity community to audit applications and analyze malicious code. Some of them extract only abstract pseudo-code from .jsc files, while others can decompiles them back to readable JavaScript.
+
+If your goal is maximum intellectual property protection, Bytenode should not be your only line of defense. We recommend adding an obfuscation step (using tools like `javascript-obfuscator`) into your build pipeline before compiling the code with Bytenode. This ensures that even if the bytecode is decompiled, the resulting JavaScript remains unreadable and hard to reverse-engineer.
+
+---
+
 ## Known Issues and Limitations
 
-* In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/bytenode/bytenode/issues/29).
+- In Node 10.x, Bytenode does not work in debug mode. See [#29](https://github.com/bytenode/bytenode/issues/29).
 
-* Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/bytenode/bytenode/issues/34). For a workaround, see [#163](https://github.com/bytenode/bytenode/issues/163)
+- Any code depends on `Function.prototype.toString` function will break, because Bytenode removes the source code from `.jsc` files and puts a dummy code instead. See [#34](https://github.com/bytenode/bytenode/issues/34). For a workaround, see [#163](https://github.com/bytenode/bytenode/issues/163)
 
-* Async Arrow Functions (and Arrow Functions in general) cause crashes in Puppeteer and in Electron apps. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/bytenode/bytenode/issues/47). They also cause issues with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). It seems that whenever there is a context change (or even when called from another file or module), arrow functions break because `V8` inspects them internally using `Function.prototype.toString` in these cases. See [#157](https://github.com/bytenode/bytenode/issues/157).
+- Async Arrow Functions (and Arrow Functions in general) cause crashes in Puppeteer and in Electron apps. See [#106](https://github.com/bytenode/bytenode/issues/106), [#47](https://github.com/bytenode/bytenode/issues/47). They also cause issues with the ndb debugger. See [#135](https://github.com/bytenode/bytenode/issues/135). It seems that whenever there is a context change (or even when called from another file or module), arrow functions break because `V8` inspects them internally using `Function.prototype.toString` in these cases. See [#157](https://github.com/bytenode/bytenode/issues/157).
 
-* **Electron ≥ 42 (V8 ≥ 14.8): bytecode compiled via `ELECTRON_RUN_AS_NODE` crashes the main process with `SIGTRAP`.** V8's serialized bytecode header carries a *read-only snapshot checksum* (header offset 16). The Electron **main/browser** process boots V8 from Chromium's `v8_context_snapshot`, whose read-only heap differs from the Node default snapshot used by `ELECTRON_RUN_AS_NODE`. So a `.jsc` produced with `compileElectronCode()` (run-as-node) carries a checksum that does not match the main process. Starting with V8 14.8 this no longer fails gracefully (`cachedDataRejected`) but hard-aborts (`EXC_BREAKPOINT` / `SIGTRAP`) while deserializing. The fix is to compile in the **same process type** that will load the `.jsc` — use [`compileElectronMainCode()`](#bytenodecompileelectronmaincodejavascriptcode-options--promisebuffer) or `compileFile({ electronMain: true })`, which compile inside an actual Electron main process. (On Electron ≤ 41 / V8 ≤ 14.6 the two checksums happened to be compatible, so `electron: true` worked there.)
+- **Electron ≥ 42 (V8 ≥ 14.8): bytecode compiled via `ELECTRON_RUN_AS_NODE` crashes the main process with `SIGTRAP`.** V8's serialized bytecode header carries a _read-only snapshot checksum_ (header offset 16). The Electron **main/browser** process boots V8 from Chromium's `v8_context_snapshot`, whose read-only heap differs from the Node default snapshot used by `ELECTRON_RUN_AS_NODE`. So a `.jsc` produced with `compileElectronCode()` (run-as-node) carries a checksum that does not match the main process. Starting with V8 14.8 this no longer fails gracefully (`cachedDataRejected`) but hard-aborts (`EXC_BREAKPOINT` / `SIGTRAP`) while deserializing. The fix is to compile in the **same process type** that will load the `.jsc` — use [`compileElectronMainCode()`](#bytenodecompileelectronmaincodejavascriptcode-options--promisebuffer) or `compileFile({ electronMain: true })`, which compile inside an actual Electron main process. (On Electron ≤ 41 / V8 ≤ 14.6 the two checksums happened to be compatible, so `electron: true` worked there.)
 
-* **Electron renderer bytecode is context-specific.** On Electron 43.5.1 and later, the renderer snapshot differs from the Node and main-process snapshots. The project’s reported checks found that bytecode compiled with `electron: true` or `electronMain: true` was rejected by renderer preloads/pages, while renderer-compiled bytecode loaded in both. Use [`compileElectronRendererCode()`](#bytenodecompileelectronrenderercodejavascriptcode-options--promisebuffer) or `compileFile({ electronRenderer: true })` for renderer code. This mode compiles in a hidden window’s preload, so the result is suitable for renderer/preload contexts and should not be used in the main process or worker threads. The reported compatibility checks covered Electron 43.4.1, 43.5.1, 43.7.3, and 44.4.3; verify the mode against the exact Electron versions you ship. See [#265](https://github.com/bytenode/bytenode/issues/265).
+- **Electron renderer bytecode is context-specific.** On Electron 43.5.1 and later, the renderer snapshot differs from the Node and main-process snapshots. The project’s reported checks found that bytecode compiled with `electron: true` or `electronMain: true` was rejected by renderer preloads/pages, while renderer-compiled bytecode loaded in both. Use [`compileElectronRendererCode()`](#bytenodecompileelectronrenderercodejavascriptcode-options--promisebuffer) or `compileFile({ electronRenderer: true })` for renderer code. This mode compiles in a hidden window’s preload, so the result is suitable for renderer/preload contexts and should not be used in the main process or worker threads. The reported compatibility checks covered Electron 43.4.1, 43.5.1, 43.7.3, and 44.4.3; verify the mode against the exact Electron versions you ship. See [#265](https://github.com/bytenode/bytenode/issues/265).
 
-  | Loaded in                 | Electron 43.4.1                   | Electron 43.5.1, 43.7.3, 44.4.3             |
-  | ----                      | ----                              | ----                                        |
-  | main, `worker_threads`    | `electronMain`                    | `electronMain` or `electron`                |
-  | `utilityProcess`          | `electron`                        | `electron` or `electronMain`                |
-  | preload, renderer page    | `electron` or `electronRenderer`  | `electronRenderer` only                      |
+  | Loaded in              | Electron 43.4.1                  | Electron 43.5.1, 43.7.3, 44.4.3 |
+  | ---------------------- | -------------------------------- | ------------------------------- |
+  | main, `worker_threads` | `electronMain`                   | `electronMain` or `electron`    |
+  | `utilityProcess`       | `electron`                       | `electron` or `electronMain`    |
+  | preload, renderer page | `electron` or `electronRenderer` | `electronRenderer` only         |
 
 ---
 
 ## Resources
 
-* [How To Compile Node.js Code Using Bytenode](https://hackernoon.com/how-to-compile-node-js-code-using-bytenode-11dcba856fa9)
-* [Bytenode Webpack Plugin](https://github.com/herberttn/bytenode-webpack-plugin)
-* [Creating JS Binaries For Electron](https://www.jjeff.com/blog/2021/4/27/creating-javascript-binaries-for-electron)
-* [Electron Bytenode Example](https://github.com/spaceagetv/electron-bytenode-example)
+- [How To Compile Node.js Code Using Bytenode](https://hackernoon.com/how-to-compile-node-js-code-using-bytenode-11dcba856fa9)
+- [Bytenode Webpack Plugin](https://github.com/herberttn/bytenode-webpack-plugin)
+- [Creating JS Binaries For Electron](https://www.jjeff.com/blog/2021/4/27/creating-javascript-binaries-for-electron)
+- [Electron Bytenode Example](https://github.com/spaceagetv/electron-bytenode-example)
 
 ---
 
@@ -97,26 +105,26 @@ sudo npm install -g bytenode
 
 Examples:
 
-* Compile `express-server.js` to `express-server.jsc`.
+- Compile `express-server.js` to `express-server.jsc`.
 
 ```console
 user@machine:~$ bytenode --compile express-server.js
 ```
 
-* Run your compiled file `express-server.jsc`.
+- Run your compiled file `express-server.jsc`.
 
 ```console
 user@machine:~$ bytenode express-server.jsc
 Server listening on port 3000
 ```
 
-* Compile all `.js` files in `./app` directory.
+- Compile all `.js` files in `./app` directory.
 
 ```console
 user@machine:~$ bytenode --compile ./app/*.js
 ```
 
-* Compile all `.js` files in your project.
+- Compile all `.js` files in your project.
 
 ```console
 user@machine:~$ bytenode --compile ./**/*.js
@@ -125,7 +133,7 @@ user@machine:~$ bytenode --compile ./**/*.js
 Note: you may need to enable `globstar` option in bash (you should add it to `~/.bashrc`):
 `shopt -s globstar`
 
-* Starting from v1.0.0, bytenode can compile from `stdin`.
+- Starting from v1.0.0, bytenode can compile from `stdin`.
 
 ```console
 echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
@@ -136,7 +144,7 @@ echo 'console.log("Hello");' | bytenode --compile - > hello.jsc
 ## Bytenode API
 
 ```javascript
-const bytenode = require('bytenode');
+const bytenode = require("bytenode");
 ```
 
 ---
@@ -145,22 +153,22 @@ const bytenode = require('bytenode');
 
 Generates v8 bytecode buffer.
 
-* Parameters:
+- Parameters:
 
 | Name           | Type   | Description                                          |
-| ----           | ----   | -----------                                          |
+| -------------- | ------ | ---------------------------------------------------- |
 | javascriptCode | string | JavaScript source that will be compiled to bytecode. |
 
-* Returns:
+- Returns:
 
 {Buffer} The generated bytecode.
 
-* Example:
+- Example:
 
 ```javascript
 let helloWorldBytecode = bytenode.compileCode(
   `console.log('Hello World!');
-  43;  // this will be returned`
+  43;  // this will be returned`,
 );
 ```
 
@@ -174,24 +182,24 @@ Asynchronous function which generates v8 bytecode buffer for Electron.
 
 Same as `bytenode.compileCode()`, but generates bytecode for the version of Electron currently installed in node_modules.
 
-* Parameters:
+- Parameters:
 
-| Name                   | Type   | Description                                          |
-| ----                   | ----   | -----------                                          |
-| javascriptCode         | string | JavaScript source that will be compiled to bytecode. |
-| options                | object | Options object.                                      |
-| options.electronPath   | string | Path to Electron executable.                         |
+| Name                 | Type   | Description                                          |
+| -------------------- | ------ | ---------------------------------------------------- |
+| javascriptCode       | string | JavaScript source that will be compiled to bytecode. |
+| options              | object | Options object.                                      |
+| options.electronPath | string | Path to Electron executable.                         |
 
-* Returns:
+- Returns:
 
 {Promise\<Buffer\>} A Promise which resolves with the generated bytecode.
 
-* Example:
+- Example:
 
 ```javascript
 let helloWorldBytecode = await bytenode.compileElectronCode(
   `console.log('Hello World!');
-  43;  // this will be returned`
+  43;  // this will be returned`,
 );
 ```
 
@@ -210,31 +218,32 @@ It briefly launches Electron (no window is created) to compile, then exits.
 > **CI / build environment notes**
 >
 > Because this spawns the Electron **browser** binary (not Node), the build machine must be able to run Electron:
-> * **macOS / Windows** runners (e.g. GitHub Actions `macos-*`, `windows-*`): work out of the box.
-> * **Linux** runners: Electron needs a display, so run the build under a virtual framebuffer, e.g. `xvfb-run -a <build command>` (install `xvfb` and the usual Electron shared libs: `libgtk-3-0`, `libnss3`, `libasound2`, …). Headless containers without `xvfb` will fail.
-> * Running as **root** in a container: handled automatically — the compile launches Electron with `--no-sandbox` (no renderer is created, so the sandbox is unnecessary).
-> * The spawned Electron must be the **same version** that will run the app (it is, when resolved from your project's `node_modules`), so the read-only snapshot checksum matches.
-> * Cross-compiling bytecode for another OS/arch is not possible here — the `.jsc` must be produced by the Electron build for the **target** platform. Compile each platform on its own runner.
+>
+> - **macOS / Windows** runners (e.g. GitHub Actions `macos-*`, `windows-*`): work out of the box.
+> - **Linux** runners: Electron needs a display, so run the build under a virtual framebuffer, e.g. `xvfb-run -a <build command>` (install `xvfb` and the usual Electron shared libs: `libgtk-3-0`, `libnss3`, `libasound2`, …). Headless containers without `xvfb` will fail.
+> - Running as **root** in a container: handled automatically — the compile launches Electron with `--no-sandbox` (no renderer is created, so the sandbox is unnecessary).
+> - The spawned Electron must be the **same version** that will run the app (it is, when resolved from your project's `node_modules`), so the read-only snapshot checksum matches.
+> - Cross-compiling bytecode for another OS/arch is not possible here — the `.jsc` must be produced by the Electron build for the **target** platform. Compile each platform on its own runner.
 
-* Parameters:
+- Parameters:
 
-| Name                 | Type   | Description                                          |
-| ----                 | ----   | -----------                                          |
-| javascriptCode       | string | JavaScript source that will be compiled to bytecode. |
-| options              | object | Options object.                                      |
-| options.electronPath | string | Path to Electron executable. Defaults to the `electron` binary resolved from node_modules. |
-| options.compress     | boolean | If true, compress the output bytecode with Brotli.  |
+| Name                 | Type    | Description                                                                                |
+| -------------------- | ------- | ------------------------------------------------------------------------------------------ |
+| javascriptCode       | string  | JavaScript source that will be compiled to bytecode.                                       |
+| options              | object  | Options object.                                                                            |
+| options.electronPath | string  | Path to Electron executable. Defaults to the `electron` binary resolved from node_modules. |
+| options.compress     | boolean | If true, compress the output bytecode with Brotli.                                         |
 
-* Returns:
+- Returns:
 
 {Promise\<Buffer\>} A Promise which resolves with the generated bytecode.
 
-* Example:
+- Example:
 
 ```javascript
 let helloWorldBytecode = await bytenode.compileElectronMainCode(
   `console.log('Hello World!');
-  43;  // this will be returned`
+  43;  // this will be returned`,
 );
 ```
 
@@ -248,16 +257,16 @@ Use this for code that will be loaded from a **preload script or a renderer page
 
 It briefly launches Electron with a hidden window, using a private temporary `--user-data-dir`, then exits. The CI notes for `compileElectronMainCode()` apply (on Linux, run it under `xvfb-run`).
 
-* Parameters:
+- Parameters:
 
-| Name                 | Type    | Description                                          |
-| ----                 | ----    | -----------                                          |
-| javascriptCode       | string  | JavaScript source that will be compiled to bytecode. |
-| options              | object  | Options object.                                      |
+| Name                 | Type    | Description                                                                                |
+| -------------------- | ------- | ------------------------------------------------------------------------------------------ |
+| javascriptCode       | string  | JavaScript source that will be compiled to bytecode.                                       |
+| options              | object  | Options object.                                                                            |
 | options.electronPath | string  | Path to Electron executable. Defaults to the `electron` binary resolved from node_modules. |
-| options.compress     | boolean | If true, compress the output bytecode with Brotli.   |
+| options.compress     | boolean | If true, compress the output bytecode with Brotli.                                         |
 
-* Returns:
+- Returns:
 
 {Promise\<Buffer\>} A Promise which resolves with the generated bytecode.
 
@@ -267,22 +276,22 @@ It briefly launches Electron with a hidden window, using a private temporary `--
 
 Runs v8 bytecode buffer and returns the result.
 
-* Parameters:
+- Parameters:
 
 | Name           | Type   | Description                                                    |
-| ----           | ----   | -----------                                                    |
+| -------------- | ------ | -------------------------------------------------------------- |
 | bytecodeBuffer | Buffer | The buffer object that was created using compileCode function. |
 
-* Returns:
+- Returns:
 
 {any} The result of the very last statement executed in the script.
 
-* Example:
+- Example:
 
 ```javascript
 const result = bytenode.runBytecode(helloWorldBytecode);
 // prints: Hello World!
-console.log(result)
+console.log(result);
 // prints: 43
 ```
 
@@ -292,34 +301,34 @@ console.log(result)
 
 Asynchronous function which compiles JavaScript file to .jsc file.
 
-* Parameters:
+- Parameters:
 
-Name                 | Type              | Description
-----                 | ----              | -----------
-args                 | object \| string
-args.filename        | string            | The JavaScript source file that will be compiled.
-args.compileAsModule | boolean           | If true, the output will be a commonjs module. Default: true.
-args.electron        | boolean           | If true, the output will be compiled through Electron via `ELECTRON_RUN_AS_NODE`. Default: false.
-args.electronMain    | boolean           | If true, compile inside an actual Electron **main process** instead of `ELECTRON_RUN_AS_NODE`. Required for Electron ≥ 42 (V8 ≥ 14.8) when the `.jsc` is loaded from the main process. See [Known Issues](#known-issues-and-limitations). Default: false.
-args.electronRenderer | boolean          | If true, compile inside an Electron **renderer** (a hidden window's preload). Use for renderer/preload bytecode on Electron versions that require the renderer snapshot (reported from 43.5.1). Cannot be combined with `electronMain`. Default: false.
-args.electronPath    | string            | Path to Electron executable. Default: Electron binary from node_modules.
-args.output          | string            | The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension.
-args.sourceMap       | boolean           | If true, write `<output>.map` and map runtime error stack traces back to the source file. Default: false.
-args.createLoader    | boolean \| string | If true, create a CommonJS loader file.  As a string, select between `module` or `commonjs` loader. Default: `false`
-args.loaderFilename  | string            | Filename or pattern for generated loader files. Defaults to originalFilename.loader.js. Use % as a substitute for originalFilename.
-output               | string            | The output filename. (Deprecated: use args.output instead)
+| Name                  | Type              | Description                                                                                                                                                                                                                                               |
+| --------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| args                  | object \| string  |
+| args.filename         | string            | The JavaScript source file that will be compiled.                                                                                                                                                                                                         |
+| args.compileAsModule  | boolean           | If true, the output will be a commonjs module. Default: true.                                                                                                                                                                                             |
+| args.electron         | boolean           | If true, the output will be compiled through Electron via `ELECTRON_RUN_AS_NODE`. Default: false.                                                                                                                                                         |
+| args.electronMain     | boolean           | If true, compile inside an actual Electron **main process** instead of `ELECTRON_RUN_AS_NODE`. Required for Electron ≥ 42 (V8 ≥ 14.8) when the `.jsc` is loaded from the main process. See [Known Issues](#known-issues-and-limitations). Default: false. |
+| args.electronRenderer | boolean           | If true, compile inside an Electron **renderer** (a hidden window's preload). Use for renderer/preload bytecode on Electron versions that require the renderer snapshot (reported from 43.5.1). Cannot be combined with `electronMain`. Default: false.   |
+| args.electronPath     | string            | Path to Electron executable. Default: Electron binary from node_modules.                                                                                                                                                                                  |
+| args.output           | string            | The output filename. Defaults to the same path and name of the original file, but with `.jsc` extension.                                                                                                                                                  |
+| args.sourceMap        | boolean           | If true, write `<output>.map` and map runtime error stack traces back to the source file. Default: false.                                                                                                                                                 |
+| args.createLoader     | boolean \| string | If true, create a CommonJS loader file. As a string, select between `module` or `commonjs` loader. Default: `false`                                                                                                                                       |
+| args.loaderFilename   | string            | Filename or pattern for generated loader files. Defaults to originalFilename.loader.js. Use % as a substitute for originalFilename.                                                                                                                       |
+| output                | string            | The output filename. (Deprecated: use args.output instead)                                                                                                                                                                                                |
 
-* Returns:
+- Returns:
 
 {Promise\<string\>}: A Promise that resolves as the compiled filename.
 
-* Examples:
+- Examples:
 
 ```javascript
 let compiledFilename = bytenode.compileFile({
-  filename: '/path/to/your/file.js',
+  filename: "/path/to/your/file.js",
   sourceMap: true,
-  output: '/path/to/compiled/file.jsc' // if omitted, it defaults to '/path/to/your/file.jsc'
+  output: "/path/to/compiled/file.jsc", // if omitted, it defaults to '/path/to/your/file.jsc'
 });
 ```
 
@@ -333,9 +342,9 @@ Previous code will produce a commonjs module that can be required using `require
 
 ```javascript
 let compiledFilename = await bytenode.compileFile({
-  filename: '/path/to/your/file.js',
-  output: '/path/to/compiled/file.jsc',
-  compileAsModule: false
+  filename: "/path/to/your/file.js",
+  output: "/path/to/compiled/file.jsc",
+  compileAsModule: false,
 });
 ```
 
@@ -345,17 +354,17 @@ For Electron apps, compile through Electron so the bytecode matches Electron's V
 
 ```javascript
 let compiledFilename = await bytenode.compileFile({
-  filename: '/path/to/your/main.js',
-  output: '/path/to/compiled/main.jsc',
-  electronMain: true // Electron main-process compile (Electron >= 42 / V8 >= 14.8)
+  filename: "/path/to/your/main.js",
+  output: "/path/to/compiled/main.jsc",
+  electronMain: true, // Electron main-process compile (Electron >= 42 / V8 >= 14.8)
   // electron: true  // legacy ELECTRON_RUN_AS_NODE compile (Electron <= 41)
 });
 
 // Preload scripts and renderer pages when renderer-specific bytecode is needed:
 await bytenode.compileFile({
-  filename: '/path/to/your/preload.js',
-  output: '/path/to/compiled/preload.jsc',
-  electronRenderer: true
+  filename: "/path/to/your/preload.js",
+  output: "/path/to/compiled/preload.jsc",
+  electronRenderer: true,
 });
 ```
 
@@ -365,28 +374,28 @@ await bytenode.compileFile({
 
 Runs .jsc file and returns the result.
 
-* Parameters:
+- Parameters:
 
 | Name     | Type   |
-| ----     | ----   |
+| -------- | ------ |
 | filename | string |
 
-* Returns:
+- Returns:
 
 {any} The result of the very last statement executed in the script.
 
-* Example:
+- Example:
 
 ```javascript
 // test.js
-console.log('Hello World!');
-43;  // this will be returned
+console.log("Hello World!");
+43; // this will be returned
 ```
 
 ```javascript
-const result = bytenode.runBytecodeFile('/path/to/test.jsc');
+const result = bytenode.runBytecodeFile("/path/to/test.jsc");
 // prints: Hello World!
-console.log(result)
+console.log(result);
 // prints: 43
 ```
 
@@ -394,20 +403,20 @@ console.log(result)
 
 #### require(filename) → {any}
 
-* Parameters:
+- Parameters:
 
 | Name     | Type   |
-| ----     | ----   |
+| -------- | ------ |
 | filename | string |
 
-* Returns:
+- Returns:
 
 {any} exported module content
 
-* Example:
+- Example:
 
 ```javascript
-let myModule = require('/path/to/your/file.jsc');
+let myModule = require("/path/to/your/file.jsc");
 ```
 
 Just like regular `.js` modules. You can also omit the extension `.jsc`.
