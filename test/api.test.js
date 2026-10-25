@@ -137,6 +137,76 @@ describe('Bytenode public API', function () {
     });
   });
 
+  describe('with an input source map', () => {
+    // A bundle compiled from two TypeScript sources. Line 0 maps into app.ts
+    // (`function` → 1:1, `throw` → 2:3, `new Error` → 2:9); line 1 maps the
+    // top-level call to util.ts 4:1. Names are delta-encoded: fail (1), then Error (0).
+    const bundle = '"use strict";function fail(){throw new Error("boom")}\nfail();\n';
+    const inputMap = {
+      version: 3,
+      sources: ['app.ts', 'util.ts'],
+      sourceRoot: '../src',
+      sourcesContent: ['/* app */', '/* util */'],
+      names: ['Error', 'fail'],
+      mappings: 'aAAAC,gBACE,MAAMD;ACER',
+      debugId: '00000000-0000-4000-8000-000000000001'
+    };
+    const inlineUrl = 'data:application/json;charset=utf-8;base64,' +
+      Buffer.from(JSON.stringify(inputMap)).toString('base64');
+    const variants = [
+      { name: 'a sourceMappingURL file', files: { 'bundle.js': bundle + '//# sourceMappingURL=maps/bundle.map\n', 'maps/bundle.map': { ...inputMap, sourceRoot: '../../src' } } },
+      { name: 'a <file>.map beside the input', files: { 'bundle.js': bundle, 'bundle.js.map': inputMap } },
+      { name: 'an inline data URL', files: { 'bundle.js': bundle + '//# sourceMappingURL=' + inlineUrl + '\n' }, compileAsModule: false }
+    ];
+
+    for (const variant of variants) {
+      it(`rebases ${variant.name} into .jsc coordinates`, async () => {
+        const root = fs.mkdtempSync(path.join(directory, 'input-map-'));
+        for (const [name, content] of Object.entries(variant.files)) {
+          fs.mkdirSync(path.dirname(path.join(root, 'dist', name)), { recursive: true });
+          fs.writeFileSync(path.join(root, 'dist', name), typeof content === 'string' ? content : JSON.stringify(content));
+        }
+        const source = path.join(root, 'dist/bundle.js');
+        const output = path.join(root, 'out/bundle.jsc');
+        fs.mkdirSync(path.dirname(output));
+        const compileAsModule = variant.compileAsModule !== false;
+        await bytenode.compileFile({ filename: source, output, sourceMap: true, compileAsModule });
+
+        const map = JSON.parse(fs.readFileSync(output + '.map', 'utf8'));
+        assert.deepEqual(map.sources, ['../src/app.ts', '../src/util.ts']);
+        assert.equal(map.sourceRoot, undefined);
+        assert.deepEqual(map.sourcesContent, inputMap.sourcesContent);
+        assert.deepEqual(map.names, inputMap.names);
+        assert.equal(map.debugId, inputMap.debugId);
+
+        // Check the encoding with Node's own decoder, not ours.
+        const prefix = compileAsModule ? require('module').wrap('\0').indexOf('\0') : 0;
+        const decoded = new (require('module').SourceMap)(map);
+        assert.deepEqual(decoded.findEntry(0, prefix + 35),
+          { generatedLine: 0, generatedColumn: prefix + 35, originalSource: '../src/app.ts', originalLine: 1, originalColumn: 8, name: 'Error' });
+        const secondLine = prefix + bundle.indexOf('\n') + 1;
+        assert.equal(decoded.findEntry(0, secondLine).originalSource, '../src/util.ts');
+        assert.equal(decoded.findEntry(0, secondLine).originalLine, 3);
+
+        const run = compileAsModule ? () => require(output) : () => bytenode.runBytecodeFile(output);
+        assert.throws(run, (error) => {
+          assert.ok(error.stack.includes(`${path.join(root, 'src/app.ts')}:2:9`), error.stack);
+          assert.ok(error.stack.includes(`${path.join(root, 'src/util.ts')}:4:1`), error.stack);
+          return true;
+        });
+      });
+    }
+
+    it('rejects an input source map that is not valid JSON', async () => {
+      const source = path.join(directory, 'broken-map.js');
+      fs.writeFileSync(source, 'module.exports = 1;\n');
+      fs.writeFileSync(source + '.map', '{ not json');
+      await assert.rejects(
+        bytenode.compileFile({ filename: source, output: path.join(directory, 'broken-map.jsc'), sourceMap: true }),
+        /Invalid source map for .*broken-map\.js/);
+    });
+  });
+
   it('writes a CommonJS loader beside the compiled file', async () => {
     const source = path.join(directory, 'loader-source.js');
     fs.writeFileSync(source, '#!/usr/bin/env node\nmodule.exports = 7;\n');

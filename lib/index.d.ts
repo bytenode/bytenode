@@ -25,7 +25,7 @@ interface BytenodeOptions {
     electronPath?: string;
     createLoader?: boolean | string;
     loaderFilename?: string;
-    /** Write an external source map at `<output>.map` for error stack traces. */
+    /** Write an external source map at `<output>.map` for error stack traces. An existing input source map is rebased, so frames point at the original sources. */
     sourceMap?: boolean;
 }
 
