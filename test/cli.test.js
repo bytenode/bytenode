@@ -26,7 +26,7 @@ describe("Bytenode CLI", function () {
     assert.equal(help.status, 0, help.stderr);
     assert.match(help.stdout, /Usage: bytenode/);
     assert.equal(version.status, 0, version.stderr);
-    assert.match(version.stdout, /bytenode 2\.0\.1/);
+    assert.match(version.stdout, /bytenode 2\.1\.0/);
     const nodeVersion = process.versions.node.split(".").join("\\.");
     assert.match(version.stdout, new RegExp(`Node ${nodeVersion}\n`));
   });
